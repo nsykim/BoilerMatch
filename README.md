@@ -1,7 +1,7 @@
 # Boiler Match
 Roommate Matching Service
 
-- Aiden Poor 
+- Aidan Poor 
 - Mitchel Craven 
 - Noah Kim
 
