@@ -21,7 +21,7 @@ def create_account():
     user_table = get_table(client, "boilermatch", "accounts")
     if user_table == None:
         logging.critical("create_account: could not connect to user table")
-        return jsonify({"error: could not connect to the server"}, 500)
+        return jsonify({"error: could not connect to the server"}), 500
     logging.info("create_acocunt: successfully connected to the server")
 
     if search_user_db(user_table, "username", username):
@@ -31,7 +31,7 @@ def create_account():
 
     if search_user_db(user_table, "email", email):
         logging.info("create_account: email is already registered in the database")
-        return jsonify({"email address is already present within the database"}, 400)
+        return jsonify({"email address is already present within the database"}), 400
     logging.info("create_account: email address is unique")
 
     create_account(client, username, email, pw, None) # temporary, since need to update create_account
