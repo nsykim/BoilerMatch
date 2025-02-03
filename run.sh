@@ -1,73 +1,33 @@
 #!/bin/bash
 
-function run_tests() {
-    case "$1" in
-        backend)
-            echo "Running backend tests and generating coverage report..."
-            pytest --cov=src tests/
-            ;;
-        frontend)
-            echo "Running frontend tests..."
-            cd frontend
-            npm test
-            cd ..
-            ;;
-        "")
-            echo "Running all tests..."
-            pytest --cov=src tests/
-            cd frontend
-            npm test
-            cd ..
-            ;;
-        *)
-            echo "Invalid test target: $1"
-            echo "Usage: $0 test {frontend|backend}"
-            exit 1
-            ;;
-    esac
+# Function to install dependencies
+install_dependencies() {
+    echo 'Installing dependencies...'
+    if ! pip install py_reqs; then
+        echo "Error installing npm"
+        return 1
+    fi
+    return 0
 }
 
-function build_backend() {
-    echo "Starting backend API..."
-    cd src
-    python3 api.py &
-    cd ..
-}
+# Check if the command is 'install'
+if [ "$#" -ne 1 ]; then
+    echo "Usage: ./run install"
+    exit 1
+fi
+command=$1
 
-function build_frontend() {
-    echo "Compiling TypeScript..."
-    cd frontend
-    tsc
-    echo "Starting frontend..."
-    npm start &
-    cd ..
-}
-
-function build_all() {
-    echo "Building and starting the entire app..."
-    build_backend
-    build_frontend
-}
-
-case "$1" in
-    test)
-        run_tests "$2"
-        ;;
-    build)
-        run_tests && build_all
-        ;;
-    "build backend")
-        build_backend
-        ;;
-    "build frontend")
-        build_frontend
-        ;;
-    *)
-        echo "Usage: $0 {test|build|build backend|build frontend}"
-        echo "Additional options for 'test': {frontend|backend}"
-        exit 1
-        ;;
-esac
-
-# Wait for background processes to finish
-wait
+if [ "$command" = "install" ]; then
+    install_dependencies
+    exit $?
+elif [ "$command" = "build" ]; then
+    python3 src/api.py
+    exit $?
+elif [ "$command" = "test" ]; then
+    echo "Running tests..."
+    python3 -m pytest test/
+    exit $?
+else
+    echo "HI"
+    fi
+fi
