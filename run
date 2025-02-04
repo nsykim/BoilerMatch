@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Function to install dependencies
+install_dependencies() {
+    echo 'Installing dependencies...'
+    if ! pip install -r py_reqs.txt; then
+        echo "Error installing dependencies"
+        return 1
+    fi
+    return 0
+}
+
+# Function to run tests and generate coverage report
+run_tests() {
+    echo 'Running tests...'
+
+    if ! python3 -m coverage run --source=src -m unittest tests/test_db_operations.py; then
+        echo "Error running tests"
+        return 1
+    fi
+    echo "Generating coverage report..."
+    python3 -m coverage report
+    return 0
+}
+
+# Check if the command is 'install'
+if [ "$#" -ne 1 ]; then
+    echo "Usage: ./run {install|build|test}"
+    exit 1
+fi
+command=$1
+
+if [ "$command" = "install" ]; then
+    install_dependencies
+    exit $?
+elif [ "$command" = "build" ]; then
+    python3 src/api.py
+    exit $?
+elif [ "$command" = "test" ]; then
+    run_tests
+    exit $?
+else
+    echo "Invalid command. Usage: ./run {install|build|test}"
+    exit 1
+fi

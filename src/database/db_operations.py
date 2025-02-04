@@ -2,16 +2,17 @@ import logging
 import os
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
-from bson.regex import Regex
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+load_dotenv()
 
 def connect_to_mongodb(database):
     try:
         logging.info("Connecting to MongoDB")
-        mongo_uri = f"mongodb+srv://{os.getenv('USER_NAME')}:{os.getenv('PASSWORD')}@cluster0.9gpef.mongodb.net/{database}?retryWrites=true&w=majority&appName=Cluster0"
+        mongo_uri = f"mongodb+srv://{os.getenv('USER_NAME')}:{os.getenv('PW')}@cluster0.9gpef.mongodb.net/{database}?retryWrites=true&w=majority&appName=Cluster0"
         logging.info("Mongo URI: %s", mongo_uri)
         client = MongoClient(mongo_uri)
         db = client[database]
