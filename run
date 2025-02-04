@@ -3,7 +3,7 @@
 # Function to install dependencies
 install_dependencies() {
     echo 'Installing dependencies...'
-    if ! pip install -r py_reqs.txt; then
+    if ! pip install -r reqs.txt; then
         echo "Error installing dependencies"
         return 1
     fi
