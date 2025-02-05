@@ -12,14 +12,18 @@ install_dependencies() {
 
 # Function to run tests and generate coverage report
 run_tests() {
-    echo 'Running tests...'
+    echo 'Running backend tests...'
 
-    if ! python3 -m coverage run --source=src -m unittest tests/test_db_operations.py; then
+    if ! python3 -m coverage run --source=src --omit=src/api.py -m unittest tests/test_db_operations.py; then
         echo "Error running tests"
         return 1
     fi
-    echo "Generating coverage report..."
+    echo "Generating python coverage report..."
     python3 -m coverage report
+
+    # echo 'Running API tests...'
+    
+    # if ! python3 -m coverage
     return 0
 }
 
