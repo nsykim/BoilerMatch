@@ -3,7 +3,6 @@ import os
 # Add the 'src' directory to sys.path so Python can find accounts.py
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-
 import unittest
 from accounts import connect_to_db, get_table, create_account, create_accounts_collection, update_account_preferences, delete_account
 from accounts import Preference, IsDealbreaker #need this for TESTING, and if you want to use those enums
@@ -181,9 +180,6 @@ class TestAccounts(unittest.TestCase):
         self.assertEqual(updated_account["preferences"]["cleanliness"]["dealbreaker"], True, "❌ Cleanliness dealbreaker update failed.")
         self.assertEqual(updated_account["preferences"]["alcohol"]["value"], Preference.NEVER.value, "❌ Alcohol preference update failed.")
         self.assertEqual(updated_account["preferences"]["alcohol"]["dealbreaker"], False, "❌ Alcohol dealbreaker update failed.")
-
-
-
 
 if __name__ == "__main__":
     # Load environment variables from .env file

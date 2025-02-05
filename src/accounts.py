@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 import bcrypt
 import logging
 import re
-
+# Function to update an account by username
+# returns true/false based on success
+import logging
+from pymongo import MongoClient
 
 #Pass in username, password, app_name
 #output is client, true/false
@@ -184,11 +187,6 @@ def delete_account(client, email):
     except Exception as e:
         logging.critical(f"delete_account: ❌ Error deleting account: {e}")
         return False
-
-# Function to update an account by username
-# returns true/false based on success
-import logging
-from pymongo import MongoClient
 
 def update_account_preferences(client, email, updates):
     """Updates an existing user account in MongoDB."""
