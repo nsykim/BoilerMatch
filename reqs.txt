@@ -2,3 +2,5 @@ Flask==2.0.1
 pymongo==4.11
 python-dotenv==1.0.1
 python_bcrypt==0.3.2
+coverage
+unittest
