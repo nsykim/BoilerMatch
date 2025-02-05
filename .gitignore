@@ -1,0 +1,14 @@
+# __pycache__
+__pycache__
+
+# .env
+.env
+
+# .vscode
+.vscode
+
+# .git
+.git
+
+# coverage
+coverage
