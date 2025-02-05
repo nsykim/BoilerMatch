@@ -30,6 +30,7 @@ def connect_to_db():
 def get_table(client, db_name, table_name):
     if client is None:
         logging.critical("get_table: Client is not connected. Call connect_to_db() first.")
+        return None
     logging.info("get_table: successfully connected to {table_name} table")
     db = client[db_name]
     return db[table_name] #RETURN THIS to use later

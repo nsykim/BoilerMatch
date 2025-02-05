@@ -1,0 +1,31 @@
+name: CI Tests
+
+on:
+  push:
+    branches:
+      - 'integration/**'  # Run CI only on branches starting with "integration/"
+
+  pull_request:
+    branches:
+      - 'integration/**'  # Run CI for PRs targeting "integration/" branches
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Adjust if needed
+
+      - name: Install Dependencies
+        run: |
+          chmod +x run  # Ensure script is executable
+          ./run install  # Install dependencies
+
+      - name: Run Tests
+        run: ./run test
