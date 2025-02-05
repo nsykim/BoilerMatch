@@ -12,7 +12,7 @@ load_dotenv()
 def connect_to_mongodb(database):
     try:
         logging.info("Connecting to MongoDB")
-        mongo_uri = f"mongodb+srv://{os.getenv('USER_NAME')}:{os.getenv('PW')}@cluster0.9gpef.mongodb.net/{database}?retryWrites=true&w=majority&appName=Cluster0"
+        mongo_uri = f"mongodb+srv://{os.getenv('USER_NAME')}:{os.getenv('PW')}@boilermatch.xx9ot.mongodb.net/{database}?retryWrites=true&w=majority&appName=BoilerMatch"
         logging.info("Mongo URI: %s", mongo_uri)
         client = MongoClient(mongo_uri)
         db = client[database]
