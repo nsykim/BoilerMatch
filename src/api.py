@@ -7,11 +7,25 @@ import bcrypt
 
 app = Flask(__name__)
 
+@app.route('/delete_account/<email>', methods=['DELETE'])
+def delete_account(email):
+    # TEMPORARY FUNCTION FOR TESTING PURPOSES
+    table = accounts_db["accounts"]
+    success = remove_user(email, table)
+    if success == True:
+        return '', 200
+    else:
+        return '', 500
+
 @app.route('/create_account', methods=['POST'])
 def create_account():
     body = request.json
     email = body.get('email')
     pw = body.get('password')
+
+    if len(pw) < 8:
+        logging.info("create_account: password is too short")
+        return '', 400
 
     if email == None or pw == None:
         logging.info("create_account: malformed request... username, email, or pw were not set")
@@ -26,14 +40,11 @@ def create_account():
         return '', 400
     logging.info("create_account: email address is unique")
 
-    ### NEED TO CHECK IF PASSWORD MEETS REQUIREMENTS
 
-    salt = bcrypt.gensalt()
-    logging.info("create_account: salt generated")
-    hashed_pw = bcrypt.hashpw(pw, salt)
+    hashed_pw = bcrypt.hashpw(pw, bcrypt.gensalt())
     logging.info("create_account: password hashed: " + hashed_pw)
 
-    success, result = create_user(table, email, salt, hashed_pw) 
+    success, result = create_user(table, email, hashed_pw) 
     if success == True:
         logging.info("create_account: account successfully created")
         return '', 200
@@ -61,11 +72,11 @@ def login():
 accounts_db = None
 chats_db = None
 if __name__ == '__main__':
-    success, accounts_db = connect_to_db("accounts")
+    success, accounts_db = connect_to_mongodb("accounts")
     if success == False:
         logging.critical("could not connect to the database")
         exit(1)
-    success, chats_db = connect_to_db("chats")
+    success, chats_db = connect_to_mongodb("chats")
     if success == False:
         logging.critical("could not connect to the database")
         exit(1)
