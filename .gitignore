@@ -11,10 +11,11 @@ __pycache__
 .git
 
 # LOGGING FILES
-error_logs.txt 
+error_log.txt 
 test_log.txt
 newman-report.xml
 .coverage
 
 # PACKAGE LOCK
 package-lock.json
+node_modules/
