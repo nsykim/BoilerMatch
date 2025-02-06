@@ -18,12 +18,8 @@ def create_account():
         return '', 400
     logging.info("create_account: all required fields were set")
 
-    success,db = connect_to_mongodb("accounts")
-    table = db["accounts"]
-    if (success == False):
-        logging.critical("create_account: could not connect to the server")
-        return '', 500
-    
+    table = accounts_db["accounts"]
+
     success, user = get_user_by_email(email, table) # returns None if user does not exist
     if user != None:
         logging.info("create_account: email is already registered in the database")
@@ -47,6 +43,30 @@ def create_account():
 
     
 
+@app.route('/login', methods=['POST'])
+def login():
+    body = request.json
+    email = body.get('email')
+    pw = body.get('password')
 
+    if email == None or pw == None:
+        logging.info("login: malformed request... username, email, or pw were not set")
+        return '', 400
+    logging.info("login: all required fields were set")
+
+    table = accounts_db["accounts"]
+
+    success, user = get_user_by_email(email, table)
+
+accounts_db = None
+chats_db = None
 if __name__ == '__main__':
+    success, accounts_db = connect_to_db("accounts")
+    if success == False:
+        logging.critical("could not connect to the database")
+        exit(1)
+    success, chats_db = connect_to_db("chats")
+    if success == False:
+        logging.critical("could not connect to the database")
+        exit(1)
     app.run(port=3020)
