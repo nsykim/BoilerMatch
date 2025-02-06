@@ -24,8 +24,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m venv venv
+          source venv/bin/activate
           chmod +x run  # Ensure script is executable
           ./run install  # Install dependencies
 
       - name: Run Tests
-        run: ./run test
+        run: |
+          source venv/bin/activate
+          ./run test
