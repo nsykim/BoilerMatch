@@ -7,6 +7,12 @@ install_dependencies() {
         echo "Error installing dependencies"
         return 1
     fi
+
+    if ! npm install; then
+        echo "Error installing npm dependencies"
+        return 1
+    fi
+
     return 0
 }
 
