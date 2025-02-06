@@ -3,8 +3,7 @@ import logging
 from flask import Flask, request, jsonify
 from database.db_operations import *
 import bcrypt
-import jwt
-import datetime
+from utils.jwt_utils import *
 
 app = Flask(__name__)
 
@@ -79,8 +78,8 @@ def login():
     check_hash = bcrypt.hashpw(pw, stored_hash)
     if stored_hash == check_hash: # check if passwords match. do this because bcrypt.checkpw is not working... temporary i hope
         logging.info("login: password matches")
-        ## need to return JWT token
         return '', 200
+        # return jsonify({"Session token:", generate_jwt(user["email"])}), 200
     else: 
         logging.info("login: password does not match")
         return '', 400

@@ -29,6 +29,14 @@ restore_logging() {
 }
 
 start_api() {
+    existing_pid=$(lsof -ti:3020)  # Get process using port 3023
+    if [ -n "$existing_pid" ]; then
+        echo "Killing existing API process (PID $existing_pid)..."
+        kill -9 "$existing_pid"
+        sleep 2  # Ensure process is fully stopped
+    fi
+
+
     echo "Starting API..."
     python3 src/api.py &
     server_pid=$!
@@ -119,7 +127,6 @@ if [ "$command" = "install" ]; then
     exit $?
 elif [ "$command" = "build" ]; then
     start_api
-    wait_for_server
     exit $?
 elif [ "$command" = "test:backend" ]; then
     run_backend_tests
