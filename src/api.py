@@ -42,20 +42,19 @@ def create_account():
     logging.info("create_account: email address is unique")
 
 
-    hashed_pw = bcrypt.hash_pw(pw, bcrypt.gensalt(log_rounds=12))
-    logging.info("create_account: password hashed: " + hashed_pw)
+    hashed_pw = bcrypt.hashpw(pw, bcrypt.gensalt(log_rounds=12))
 
     success, result = create_user(table, email, hashed_pw) 
     if success == True:
         logging.info("create_account: account successfully created")
         return '', 200
     else:
-        logging.critical("create_account: account could not be created")
+        logging.error("create_account: account could not be created")
         return '', 500
 
     
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET'])
 def login():
     body = request.json
     email = body.get('email')
@@ -76,16 +75,9 @@ def login():
         logging.info("login: user not found")
         return '', 400
 
-
-    success, user = get_user_by_email(email, table)
-    if success == False:
-        logging.info("login: error fetching user")
-        return '', 500
-    elif user == None:
-        logging.info("login: user not found")
-        return '', 400
-
-    if bcrypt.check_pw(pw, user['pwHash']):
+    stored_hash = user["pwHash"]
+    check_hash = bcrypt.hashpw(pw, stored_hash)
+    if stored_hash == check_hash: # check if passwords match. do this because bcrypt.checkpw is not working... temporary i hope
         logging.info("login: password matches")
         ## need to return JWT token
         return '', 200
@@ -99,10 +91,10 @@ chats_db = None
 if __name__ == '__main__':
     success, accounts_db = connect_to_mongodb("accounts")
     if success == False:
-        logging.critical("could not connect to the database")
+        logging.error("could not connect to the database")
         exit(1)
     success, chats_db = connect_to_mongodb("chats")
     if success == False:
-        logging.critical("could not connect to the database")
+        logging.error("could not connect to the database")
         exit(1)
     app.run(port=3020)

@@ -2,8 +2,10 @@ import logging
 import os
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO)
+load_dotenv()
 
 def connect_to_mongodb(database):
     try:
@@ -15,7 +17,7 @@ def connect_to_mongodb(database):
         logging.info('Connected to MongoDB')
         return True, db
     except PyMongoError as error:
-        logging.critical('Error connecting to MongoDB: %s', error)
+        logging.error('Error connecting to MongoDB: %s', error)
         return False, error
 
 def create_user(collection, email, pw_hash, preferences=None, user_info=None):
@@ -30,7 +32,7 @@ def create_user(collection, email, pw_hash, preferences=None, user_info=None):
         logging.info('User created - email: %s', email)
         return True, email
     except PyMongoError as error:
-        logging.critical('Error saving package: %s', error)
+        logging.error('Error saving package: %s', error)
         return False, error
 
 def remove_user(email, collection):
@@ -39,7 +41,7 @@ def remove_user(email, collection):
         logging.info('User removed: %s', email)
         return True
     except PyMongoError as error:
-        logging.critical('Error removing user: %s', error)
+        logging.error('Error removing user: %s', error)
         return False
 
 def get_user_by_email(email, collection):
