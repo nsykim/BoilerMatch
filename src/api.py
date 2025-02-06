@@ -41,7 +41,7 @@ def create_account():
     logging.info("create_account: email address is unique")
 
 
-    hashed_pw = bcrypt.hashpw(pw, bcrypt.gensalt())
+    hashed_pw = bcrypt.hash_pw(pw, bcrypt.gensalt(log_rounds=12))
     logging.info("create_account: password hashed: " + hashed_pw)
 
     success, result = create_user(table, email, hashed_pw) 
@@ -68,6 +68,31 @@ def login():
     table = accounts_db["accounts"]
 
     success, user = get_user_by_email(email, table)
+    if success == False:
+        logging.info("login: error fetching user")
+        return '', 500
+    elif user == None:
+        logging.info("login: user not found")
+        return '', 400
+
+
+    success, user = get_user_by_email(email, table)
+    if success == False:
+        logging.info("login: error fetching user")
+        return '', 500
+    elif user == None:
+        logging.info("login: user not found")
+        return '', 400
+
+    if bcrypt.check_pw(pw, user['pwHash']):
+        logging.info("login: password matches")
+        ## need to return JWT token
+        return '', 200
+    else: 
+        logging.info("login: password does not match")
+        return '', 400
+
+
 
 accounts_db = None
 chats_db = None

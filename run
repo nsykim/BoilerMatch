@@ -14,7 +14,7 @@ install_dependencies() {
 run_tests() {
     echo 'Running backend tests...'
 
-    if ! python3 -m coverage run --source=src --omit=src/api.py -m unittest tests/test_db_operations.py; then
+    if ! python3 -m coverage run --source=src --omit=src/api.py -m unittest discover -s tests; then
         echo "Error running tests"
         return 1
     fi

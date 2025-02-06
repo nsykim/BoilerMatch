@@ -51,6 +51,7 @@ def get_user_by_email(email, collection):
         if not user:
             logging.info('No user found with email %s', email)
             return False, None
+        logging.info('User found: %s', user)
         return True, user
     except PyMongoError as error:
         logging.error('Error fetching user: %s', error)
