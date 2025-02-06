@@ -5,7 +5,6 @@ from pymongo.errors import PyMongoError
 
 logging.basicConfig(level=logging.INFO)
 
-
 def connect_to_mongodb(database):
     try:
         logging.info("Connecting to MongoDB")
@@ -27,7 +26,7 @@ def create_user(collection, email, pw_hash, preferences=None, user_info=None):
         "userInfo": user_info
     }
     try:
-        result = collection.insert_one(new_user)
+        collection.insert_one(new_user)
         logging.info('User created - email: %s', email)
         return True, email
     except PyMongoError as error:

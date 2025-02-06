@@ -1,7 +1,6 @@
 import json
 import logging
 from flask import Flask, request, jsonify
-from accounts import *
 from database.db_operations import *
 import bcrypt
 import jwt

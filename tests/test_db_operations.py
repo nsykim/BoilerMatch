@@ -182,7 +182,6 @@ class TestDatabaseOperations(unittest.TestCase):
         # Test data
         expected_user = {
             "email": "test@example.com",
-            "salt": "test_salt",
             "pwHash": "test_hash",
             "preferences": None,
             "userInfo": None
