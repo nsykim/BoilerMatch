@@ -7,15 +7,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Fetch the JWT secret key from environment variables
-SECRET_KEY = os.getenv("JWT_SECRET", "default_secret")  # Use a default only in dev
+SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = "HS256"
 
-# Generates a JWT with the given payload and expiration time.
-def generate_jwt(payload: Dict, expires_in: int = 3600) -> str:
-    exp_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=expires_in)
-    payload["exp"] = exp_time
-    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-    return token
+# Generates a JWT given user data
+def generate_jwt(email: str, expires_in: int = 3600) -> str:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    payload = {
+        "email": email,
+        # "role": role 
+        "iat": now.timestamp(),  # token issue date
+        "exp": (now + datetime.timedelta(seconds=expires_in)).timestamp()  # token expiration date
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 # Validates a JWT and returns the decoded payload if valid.
 def validate_jwt(token: str) -> Optional[Dict]:
@@ -28,5 +32,3 @@ def validate_jwt(token: str) -> Optional[Dict]:
         print("Invalid token.")
     
     return None
-
-print(SECRET_KEY)
