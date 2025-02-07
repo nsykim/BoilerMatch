@@ -99,14 +99,13 @@ class TestDatabaseOperations(unittest.TestCase):
         """Test successful user creation."""
         # Test data
         email = "test@example.com"
-        salt = "test_salt"
         pw_hash = "test_hash"
         
         # Configure mock
         self.mock_collection.insert_one.return_value.inserted_id = "123"
         
         # Execute test
-        success, result = create_user(self.mock_collection, email, salt, pw_hash)
+        success, result = create_user(self.mock_collection, email, pw_hash)
         
         # Assertions
         self.assertTrue(success)
@@ -116,7 +115,6 @@ class TestDatabaseOperations(unittest.TestCase):
         # Verify the document structure
         called_doc = self.mock_collection.insert_one.call_args[0][0]
         self.assertEqual(called_doc["email"], email)
-        self.assertEqual(called_doc["salt"], salt)
         self.assertEqual(called_doc["pwHash"], pw_hash)
         self.assertIsNone(called_doc["preferences"])
         self.assertIsNone(called_doc["userInfo"])
@@ -132,7 +130,6 @@ class TestDatabaseOperations(unittest.TestCase):
         success, result = create_user(
             self.mock_collection,
             email,
-            "salt",
             "hash",
             preferences=preferences,
             user_info=user_info
@@ -185,7 +182,6 @@ class TestDatabaseOperations(unittest.TestCase):
         # Test data
         expected_user = {
             "email": "test@example.com",
-            "salt": "test_salt",
             "pwHash": "test_hash",
             "preferences": None,
             "userInfo": None

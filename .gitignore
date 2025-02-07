@@ -10,5 +10,12 @@ __pycache__
 # .git
 .git
 
-# coverage
-coverage
+# LOGGING FILES
+error_log.txt 
+test_log.txt
+newman-report.xml
+.coverage
+
+# PACKAGE LOCK
+package-lock.json
+node_modules/

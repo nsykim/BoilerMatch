@@ -7,19 +7,111 @@ install_dependencies() {
         echo "Error installing dependencies"
         return 1
     fi
+
+    if ! npm install; then
+        echo "Error installing npm dependencies"
+        return 1
+    fi
+
     return 0
 }
 
-# Function to run tests and generate coverage report
-run_tests() {
-    echo 'Running tests...'
+suppress_logging() {
+    export LOG_LEVEL_BEFORE=$(python3 -c "import logging; print(logging.getLogger().getEffectiveLevel())")
+    python3 -c "import logging; logging.basicConfig(level=logging.CRITICAL)"
+}
 
-    if ! python3 -m coverage run --source=src -m unittest tests/test_db_operations.py; then
+# Function to restore logging after tests
+restore_logging() {
+    if [ -n "$LOG_LEVEL_BEFORE" ]; then
+        python3 -c "import logging; logging.basicConfig(level=int($LOG_LEVEL_BEFORE))"
+    fi
+}
+
+start_api() {
+    existing_pid=$(lsof -ti:3020)  # Get process using port 3023
+    if [ -n "$existing_pid" ]; then
+        echo "Killing existing API process (PID $existing_pid)..."
+        kill -9 "$existing_pid"
+        sleep 2  # Ensure process is fully stopped
+    fi
+
+
+    echo "Starting API..."
+    python3 src/api.py &
+    server_pid=$!
+    echo "API started with PID $server_pid"
+}
+
+wait_for_server() {
+    echo "Waiting for the server to be ready..."
+    for i in {1..10}; do  # Wait for up to 10 seconds
+        if curl --silent http://127.0.0.1:3020; then # THIS ONLY WORKS LOCALLY. WILL HAVE TO CHANGE FOR CD
+            echo "Server is up and running!"
+            return 0
+        fi
+        echo "Waiting for server... retrying ($i/10)"
+        sleep 1
+    done
+    echo "Server did not start in time."
+    exit 1
+}
+
+# Function to run tests and generate coverage report
+run_backend_tests() {
+    echo 'Running backend tests...'
+
+    if ! python3 -m coverage run --source=src --omit=src/api.py -m unittest discover -s tests; then
         echo "Error running tests"
         return 1
     fi
-    echo "Generating coverage report..."
+    echo "Generating python coverage report..."
     python3 -m coverage report
+    return 0
+}
+
+run_api_tests() {
+    echo 'Running API tests...'
+    if ! newman run tests/BoilerMatch.postman_collection.json --reporters cli,junit --reporter-junit-export newman-report.xml; then
+        echo "Error running API tests"
+        return 1
+    fi
+    echo "All tests passed successfully."
+    return 0
+}
+
+stop_api() {
+    echo "Stopping API..."
+    if [ -n "$server_pid" ]; then
+        kill $server_pid
+        echo "API stopped."
+    else
+        echo "No API process to stop."
+    fi
+}
+
+all_tests() {
+    echo "Running all tests..."
+    LOG_FILE="test_log.txt"
+    ERROR_LOG_FILE="error_log.txt"
+    suppress_logging
+
+     if ! python3 -m coverage run --source=src --omit=src/api.py -m unittest discover -s tests >> "$LOG_FILE" 2>> "$ERROR_LOG_FILE"; then
+        echo "Error running tests"
+        return 1
+    fi
+
+    echo "Generating python coverage report..."
+    python3 -m coverage report >> "$LOG_FILE" 2>> "$ERROR_LOG_FILE"
+
+    echo 'Running API tests...'
+    if ! newman run tests/BoilerMatch.postman_collection.json --reporters cli,junit --reporter-junit-export newman-report.xml >> "$LOG_FILE" 2>> "$ERROR_LOG_FILE"; then
+        echo "Error running API tests"
+        return 1
+    fi
+
+    echo "All tests passed successfully." | tee -a "$LOG_FILE"
+    restore_logging
     return 0
 }
 
@@ -34,10 +126,22 @@ if [ "$command" = "install" ]; then
     install_dependencies
     exit $?
 elif [ "$command" = "build" ]; then
-    python3 src/api.py
+    start_api
+    exit $?
+elif [ "$command" = "test:backend" ]; then
+    run_backend_tests
+    exit $?
+elif [ "$command" = "test:api" ]; then
+    start_api
+    wait_for_server
+    run_api_tests
+    stop_api
     exit $?
 elif [ "$command" = "test" ]; then
-    run_tests
+    start_api
+    wait_for_server
+    all_tests
+    stop_api
     exit $?
 else
     echo "Invalid command. Usage: ./run {install|build|test}"
