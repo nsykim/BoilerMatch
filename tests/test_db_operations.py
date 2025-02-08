@@ -66,8 +66,6 @@ class TestDatabaseOperations(unittest.TestCase):
         
         success, db = connect_to_mongodb("test_db")
 
-        print(f"MongoClient Called With: {self.mock_mongo_client.call_args}")  # Debug output
-        
         # Assertions
         self.assertTrue(success)
         self.assertEqual(db, self.mock_db)
