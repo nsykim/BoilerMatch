@@ -12,6 +12,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      USER: ${{ secrets.USER_NAME }}
+      PW: ${{ secrets.PW }} 
 
     steps:
       - name: Checkout Repository
