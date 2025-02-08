@@ -65,7 +65,7 @@ class TestDatabaseOperations(unittest.TestCase):
         self.mock_mongo_client.return_value = self.mock_client
         
         success, db = connect_to_mongodb("test_db")
-        
+
         # Assertions
         self.assertTrue(success)
         self.assertEqual(db, self.mock_db)
