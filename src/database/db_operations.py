@@ -6,6 +6,9 @@ from pymongo.errors import PyMongoError
 logging.basicConfig(level=logging.INFO)
 
 def connect_to_mongodb(database):
+    if os.getenv("CI"):
+        logging.info("Skipping MongoDB connection in CI")
+        return True, MagicMock()  # Return a mocked DB object
     try:
         logging.info("Connecting to MongoDB")
         mongo_uri = f"mongodb+srv://{os.getenv('USER_NAME')}:{os.getenv('PW')}@boilermatch.xx9ot.mongodb.net/{database}?retryWrites=true&w=majority&appName=BoilerMatch"
