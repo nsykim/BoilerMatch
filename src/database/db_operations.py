@@ -7,6 +7,28 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
+# -1 = NOT SET
+# 0 = DON'T CARE / NOT IMPORTANT
+# 1 = Not very important
+# 2 = Somewhat important
+# 3 = Very important
+# 4 = Extremely important
+# 5 = Deal breaker
+
+empty_preferences = {
+    "Cleanliness": -1,
+    "Noise": -1,
+    "Social": -1,
+    "Sleep Schedule": -1,
+    "Smoking": -1,
+    "Pets": -1,
+    "Alcohol": -1,
+    "Gender": -1,
+    "Age": -1,
+    "Politics": -1,
+
+}
+
 def connect_to_mongodb(database):
     try:
         logging.info("Connecting to MongoDB")
@@ -20,7 +42,7 @@ def connect_to_mongodb(database):
         logging.error('Error connecting to MongoDB: %s', error)
         return False, error
 
-def create_user(collection, email, pw_hash, preferences=None, user_info=None):
+def create_user(collection, email, pw_hash, preferences=empty_preferences, user_info=None):
     new_user = {
         "email": email,
         "pwHash": pw_hash,
@@ -55,3 +77,12 @@ def get_user_by_email(email, collection):
     except PyMongoError as error:
         logging.error('Error fetching user: %s', error)
         return False, error
+
+def update_preferences(user, preferences, collection, email):
+    try:
+        collection.update_one({"email": email}, {"$set": {"preferences": preferences}}) 
+        user["preferences"] = preferences
+        return True
+    except PyMongoError as error:
+        logging.error('Error updating preferences: %s', error)
+        return False

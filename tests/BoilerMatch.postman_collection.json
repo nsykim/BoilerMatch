@@ -103,6 +103,120 @@
 			"response": []
 		},
 		{
+			"name": "set_preferences fail (auth)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "-1",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\", \r\n    \"preferences\": {\r\n        \"Cleanliness\": 4,\r\n        \"Noise\": 1,\r\n        \"Social\": 3,\r\n        \"Sleep Schedule\": 4,\r\n        \"Smoking\": 0,\r\n        \"Pets\": 2,\r\n        \"Alcohol\": 3,\r\n        \"Gender\": 2,\r\n        \"Age\": 1,\r\n        \"Politics\": 1\r\n    }\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/set_preferences",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"set_preferences"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "set_preferences success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{session_token}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\", \r\n    \"preferences\": {\r\n        \"Cleanliness\": 4,\r\n        \"Noise\": 1,\r\n        \"Social\": 3,\r\n        \"Sleep Schedule\": 4,\r\n        \"Smoking\": 0,\r\n        \"Pets\": 2,\r\n        \"Alcohol\": 3,\r\n        \"Gender\": 2,\r\n        \"Age\": 1,\r\n        \"Politics\": 1\r\n    }\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/set_preferences",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"set_preferences"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "login failure (incorrect password)",
 			"event": [
 				{
@@ -161,10 +275,10 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Response status code is 200 and has no other properties\", function () {\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
 							"  pm.response.to.have.status(200);\r",
-							"});\r",
-							""
+							"  pm.environment.set(\"session_token\", pm.response.json().session_token);\r",
+							"})"
 						],
 						"type": "text/javascript",
 						"packages": {}
