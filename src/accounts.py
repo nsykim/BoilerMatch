@@ -1,16 +1,10 @@
-import os
 import pymongo
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from enum import Enum
-from dotenv import load_dotenv
 import bcrypt
 import logging
 import re
-# Function to update an account by username
-# returns true/false based on success
-import logging
-from pymongo import MongoClient
 
 #Pass in username, password, app_name
 #output is client, true/false
@@ -61,6 +55,8 @@ def is_valid_email(email):
     email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
     return re.match(email_regex, email) is not None
 
+
+
 # Enum for likert preferences
 class Preference(Enum):
     NOT_SPECIFIED = 0
@@ -92,7 +88,7 @@ class AccessLevel(Enum):
 
 #returns inserted_id
 # returns true/false based on success
-def create_account(client, username, email, password, name_on_profile, address, access_level = AccessLevel.USER.value, images=None, prompt=None, preferences=None):
+def create_account(client, username, email, password, name_on_profile, address, access_level = AccessLevel.USER.value, images=None, prompts=None, preferences=None):
     """Creates a new user account in MongoDB."""
     users, success = get_table(client, "boilermatch", "accounts")
     if not success:
@@ -134,14 +130,14 @@ def create_account(client, username, email, password, name_on_profile, address, 
         "username": username,
         "email": email,
         "password_hash": hashed_password,
-        "salt": salt,
+        #"salt": salt, DONT NEED THIS ANYMORE FOR DECRYPTION
         "access_level": access_level,
         
         "user_info": {
             "name_on_profile": name_on_profile,
             "address": address,
             "images": images if images else [""] * 3,
-            "prompt": prompt if prompt else "No prompt provided."
+            "prompts": prompts if prompts else "No prompt provided."
         },
 
         "preferences": preferences
@@ -334,3 +330,5 @@ def create_accounts_collection(client):
 #make accounts fit account schema in text
 #update tests to be done in one testing file easily
 #make a file that has test_db_main or something and import shit
+
+#dont need salt
