@@ -85,6 +85,7 @@ def login():
         logging.info("login: password does not match")
         return '', 400
 
+# FOR KNN
 @app.route('/users_by_school/<school>', methods=['GET'])
 def get_school_users(school):
     table = accounts_db["accounts"]
@@ -98,6 +99,7 @@ def get_school_users(school):
         
     return jsonify({"users": result}), 200
 
+# FOR KNN
 @app.route('/get_roommate_recommendations/<email>', methods=['GET'])
 def get_roommate_recommendations(email):
     # Get target user

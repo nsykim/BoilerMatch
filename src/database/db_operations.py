@@ -56,6 +56,7 @@ def get_user_by_email(email, collection):
         logging.error('Error fetching user: %s', error)
         return False, error
 
+# FOR KNN
 def get_users_by_school(school, collection, limit=100):
     try:
         # Using aggregation pipeline to first match by school then get random sample
