@@ -1,0 +1,21 @@
+# __pycache__
+__pycache__
+
+# .env
+.env
+
+# .vscode
+.vscode
+
+# .git
+.git
+
+# LOGGING FILES
+error_log.txt 
+test_log.txt
+newman-report.xml
+.coverage
+
+# PACKAGE LOCK
+package-lock.json
+node_modules/

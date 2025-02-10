@@ -1,0 +1,40 @@
+name: CI Tests
+
+on:
+  push:
+    branches:
+      - 'integration/**'  # Run CI only on branches starting with "integration/"
+
+  pull_request:
+    branches:
+      - 'integration/**'  # Run CI for PRs targeting "integration/" branches
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      USER: ${{ secrets.USER_NAME }}
+      PW: ${{ secrets.PW }} 
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Adjust if needed
+
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          chmod +x run  # Ensure script is executable
+          ./run install  # Install dependencies
+
+      - name: Run Tests
+        run: |
+          source venv/bin/activate
+          ./run test
