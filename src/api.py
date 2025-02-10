@@ -6,8 +6,6 @@ import bcrypt
 from utils.jwt_utils import *
 from utils.fetch_colleges import fetch_colleges
 
-COLLEGE_SCORECARD_API = "https://api.data.gov/ed/collegescorecard/v1/schools"
-
 app = Flask(__name__)
 
 @app.route('/delete_account/<email>', methods=['DELETE'])
