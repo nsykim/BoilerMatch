@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from database.db_operations import *
 import bcrypt
 from utils.jwt_utils import *
+from models.roommate_recommender import RoommateRecommender
 
 app = Flask(__name__)
 
@@ -84,6 +85,48 @@ def login():
         logging.info("login: password does not match")
         return '', 400
 
+@app.route('/users_by_school/<school>', methods=['GET'])
+def get_school_users(school):
+    table = accounts_db["accounts"]
+    success, result = get_users_by_school(school, table)
+    
+    if not success:
+        return jsonify({"error": "Failed to fetch users"}), 500
+    
+    if not result:
+        return jsonify({"error": "No users found"}), 404
+        
+    return jsonify({"users": result}), 200
+
+@app.route('/get_roommate_recommendations/<email>', methods=['GET'])
+def get_roommate_recommendations(email):
+    # Get target user
+    table = accounts_db["accounts"]
+    success, target_user = get_user_by_email(email, table)
+    
+    if not success or not target_user:
+        return jsonify({"error": "User not found"}), 404
+        
+    # Get target user's school
+    user_school = target_user.get("userInfo", {}).get("school")
+    if not user_school:
+        return jsonify({"error": "User school not found"}), 400
+        
+    # Get potential matches from same school
+    success, school_users = get_users_by_school(user_school, table)
+    if not success:
+        return jsonify({"error": "Failed to fetch potential matches"}), 500
+        
+    # Initialize recommender and get recommendations
+    recommender = RoommateRecommender(n_neighbors=20)
+    recommendations = recommender.get_recommendations(target_user, school_users)
+    
+    # Format and return recommendations
+    formatted_recommendations = recommender.format_recommendations(recommendations)
+    
+    return jsonify({
+        "recommendations": formatted_recommendations
+    }), 200
 
 accounts_db = None
 chats_db = None
