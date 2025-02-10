@@ -15,7 +15,7 @@ jobs:
     
     env:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      USER: ${{ secrets.USER_NAME }}
+      USER_NAME: ${{ secrets.USER_NAME }}
       PW: ${{ secrets.PW }} 
 
     steps:
