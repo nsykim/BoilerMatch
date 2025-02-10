@@ -5,6 +5,9 @@ from database.db_operations import *
 import bcrypt
 from utils.jwt_utils import *
 from models.roommate_recommender import RoommateRecommender
+from utils.fetch_colleges import fetch_colleges
+
+COLLEGE_SCORECARD_API = "https://api.data.gov/ed/collegescorecard/v1/schools"
 
 app = Flask(__name__)
 
@@ -84,6 +87,17 @@ def login():
     else: 
         logging.info("login: password does not match")
         return '', 400
+    
+@app.route('/autocomplete_colleges', methods=['GET'])
+def autocomplete_colleges():
+    query = request.args.get('q', '').strip()
+    result, status_code = fetch_colleges(query)
+    
+    if isinstance(result, dict): # Error case
+        return jsonify(result), status_code
+    
+    return jsonify({"colleges": result}), status_code
+
 
 # FOR KNN
 @app.route('/users_by_school/<school>', methods=['GET'])
