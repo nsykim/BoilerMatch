@@ -24,7 +24,7 @@ jobs:
 
       - name: Check env variables
         run: |
-          echo "JWT_SECRET=$JWT_SECRET
+          echo "JWT_SECRET=$JWT_SECRET"
           echo "USER=$USER"
           echo "PW=$PW"
 
