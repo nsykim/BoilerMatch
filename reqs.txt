@@ -9,3 +9,5 @@ pyjwt
 subprocess.run
 requests
 numpy
+sklearn
+typing
