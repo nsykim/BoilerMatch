@@ -28,7 +28,7 @@ def validate_jwt(token: str) -> Optional[Dict]:
         return decoded_payload
     except jwt.ExpiredSignatureError:
         print("Token has expired.")
+        return {"email": -1}
     except jwt.InvalidTokenError:
         print("Invalid token.")
-    
-    return None
+        return {"email": -1}

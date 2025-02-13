@@ -7,7 +7,7 @@ import time
 # Add the 'src' directory to sys.path so Python can find jwt_utils.py
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/utils")))
 
-from jwt_utils import generate_jwt, validate_jwt, SECRET_KEY
+from src.utils.jwt_utils import generate_jwt, validate_jwt, SECRET_KEY
 
 class TestJWTFunctions(unittest.TestCase):
     def setUp(self):
@@ -37,7 +37,7 @@ class TestJWTFunctions(unittest.TestCase):
         
         # Validate should return None for expired token
         decoded = validate_jwt(token)
-        self.assertIsNone(decoded)
+        self.assertEqual(decoded, {"email": -1})
 
     def test_invalid_jwt(self):
         """Test invalid token scenarios."""
@@ -49,7 +49,7 @@ class TestJWTFunctions(unittest.TestCase):
         
         # Validate should return None for tampered token
         decoded = validate_jwt(tampered_token)
-        self.assertIsNone(decoded)
+        self.assertEqual(decoded, {"email": -1})
 
     def test_jwt_with_different_emails(self):
         """Test JWT with various email addresses."""
