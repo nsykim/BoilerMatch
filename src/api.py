@@ -80,8 +80,7 @@ def login():
     check_hash = bcrypt.hashpw(pw, stored_hash)
     if stored_hash == check_hash: # check if passwords match. do this because bcrypt.checkpw is not working... temporary i hope
         logging.info("login: password matches")
-        return '', 200
-        # return jsonify({"Session token:", generate_jwt(user["email"])}), 200
+        return jsonify({"session_token": generate_jwt(user["email"])}), 200
     else: 
         logging.info("login: password does not match")
         return '', 400
@@ -141,6 +140,39 @@ def get_roommate_recommendations():
     return jsonify({
         "recommendations": formatted_recommendations
     }), 200
+@app.route('/set_preferences', methods=['POST'])
+def set_preferences():
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers['Authorization']
+    preferences = body.get('preferences')
+
+    if email == None or session_token == None or preferences == None:
+        logging.info("set_preferences: malformed request... username, email, or pw were not set")
+        return session_token, 400
+    logging.info("set_preferences: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("set_preferences: invalid session token")
+        return session_token, 401
+    logging.info("set_preferences: valid session token")
+
+    table = accounts_db["accounts"]
+
+    success, user = get_user_by_email(email, table)
+    if success == False or user == None:
+        logging.info("set_preferences: error fetching user")
+        return session_token, 500
+    
+    logging.info("user: %s", user)
+    success = update_preferences(user, preferences, table, email)
+    if success == True:
+        logging.info("set_preferences: preferences successfully updated")
+        return session_token, 200
+    else:
+        logging.error("set_preferences: preferences could not be updated")
+        return session_token, 500
+
 
 accounts_db = None
 chats_db = None

@@ -15,12 +15,17 @@ jobs:
     
     env:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      USER: ${{ secrets.USER_NAME }}
+      USER_NAME: ${{ secrets.USER_NAME }}
       PW: ${{ secrets.PW }} 
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Check env variables
+        run: |
+          echo "USER=${#USER}"
+          echo "PW=${#PW}"
 
       - name: Set Up Python
         uses: actions/setup-python@v4

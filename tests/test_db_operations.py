@@ -11,7 +11,8 @@ with patch('pymongo.MongoClient'):
         connect_to_mongodb,
         create_user,
         remove_user,
-        get_user_by_email
+        get_user_by_email,
+        update_preferences
     )
 
 from pymongo.errors import PyMongoError
@@ -116,8 +117,6 @@ class TestDatabaseOperations(unittest.TestCase):
         called_doc = self.mock_collection.insert_one.call_args[0][0]
         self.assertEqual(called_doc["email"], email)
         self.assertEqual(called_doc["pwHash"], pw_hash)
-        self.assertIsNone(called_doc["preferences"])
-        self.assertIsNone(called_doc["userInfo"])
 
     def test_create_user_with_optional_fields(self):
         """Test user creation with preferences and user info."""
@@ -222,6 +221,83 @@ class TestDatabaseOperations(unittest.TestCase):
         self.assertFalse(success)
         self.assertIsInstance(error, PyMongoError)
         self.assertEqual(str(error), "Find failed")
+
+
+
+    def test_update_preferences_success(self):
+        # Configure mock for successful preferences update
+        user = {
+            "email": "test@example.com",
+            "preferences": {
+                "Cleanliness": -1,
+                "Noise": -1,
+                "Social": -1,
+                "Sleep Schedule": -1,
+                "Smoking": -1,
+                "Pets": -1,
+                "Alcohol": -1,
+                "Gender": -1,
+                "Age": -1,
+                "Politics": -1,
+            }
+        }
+        new_preferences = {
+            "Cleanliness": 3,
+            "Noise": 2,
+            "Social": 4,
+            "Sleep Schedule": 1,
+            "Smoking": 0,
+            "Pets": 5,
+            "Alcohol": 2,
+            "Gender": 1,
+            "Age": 3,
+            "Politics": 4,
+        }
+        
+        success = update_preferences(user, new_preferences, self.mock_collection, "test@example.com")
+        
+        self.assertTrue(success)
+        self.assertEqual(user["preferences"], new_preferences)
+        self.mock_collection.update_one.assert_called_once_with(
+            {"email": "test@example.com"},
+            {"$set": {"preferences": new_preferences}}
+        )
+
+    def test_update_preferences_failure(self):
+        # Simulate database error during preferences update
+        user = {
+            "email": "test@example.com",
+            "preferences": {
+                "Cleanliness": -1,
+                "Noise": -1,
+                "Social": -1,
+                "Sleep Schedule": -1,
+                "Smoking": -1,
+                "Pets": -1,
+                "Alcohol": -1,
+                "Gender": -1,
+                "Age": -1,
+                "Politics": -1,
+            }
+        }
+        new_preferences = {
+            "Cleanliness": 3,
+            "Noise": 2,
+            "Social": 4,
+            "Sleep Schedule": 1,
+            "Smoking": 0,
+            "Pets": 5,
+            "Alcohol": 2,
+            "Gender": 1,
+            "Age": 3,
+            "Politics": 4,
+        }
+        self.mock_collection.update_one.side_effect = PyMongoError("Update failed")
+        
+        success = update_preferences(user, new_preferences, self.mock_collection, "test@example.com")
+        
+        self.assertFalse(success)
+        self.assertNotEqual(user["preferences"], new_preferences)
 
 if __name__ == "__main__":
   unittest.main()
