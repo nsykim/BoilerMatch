@@ -103,12 +103,13 @@ class TestDatabaseOperations(unittest.TestCase):
         # Test data
         email = "test@example.com"
         pw_hash = "test_hash"
+        school = "Purdue University"
         
         # Configure mock
         self.mock_collection.insert_one.return_value.inserted_id = "123"
         
         # Execute test
-        success, result = create_user(self.mock_collection, email, pw_hash)
+        success, result = create_user(self.mock_collection, email, pw_hash, school)
         
         # Assertions
         self.assertTrue(success)
@@ -124,6 +125,8 @@ class TestDatabaseOperations(unittest.TestCase):
         """Test user creation with preferences and user info."""
         # Test data
         email = "test@example.com"
+        pw_hash = "test_hash"
+        school = "IU"
         preferences = {"theme": "dark"}
         user_info = {"name": "Test User"}
         
@@ -131,7 +134,8 @@ class TestDatabaseOperations(unittest.TestCase):
         success, result = create_user(
             self.mock_collection,
             email,
-            "hash",
+            pw_hash,
+            school,
             preferences=preferences,
             user_info=user_info
         )
