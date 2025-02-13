@@ -36,13 +36,11 @@ jobs:
 
       - name: Run Tests
         run: |
-          source venv/bin/activate
           ./run test
 
       - name: Build Wheel File
         if: success()  # Only run if tests pass
         run: |
-          source venv/bin/activate
           python -m pip install --upgrade build
           python -m build --wheel
           
