@@ -38,17 +38,3 @@ jobs:
         run: |
           source venv/bin/activate
           ./run test
-
-      - name: Build Wheel File
-        if: success() 
-        run: |
-          source venv/bin/activate
-          python -m pip install --upgrade build
-          python -m build --wheel
-          
-      - name: Upload Wheel File
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: whl-package
-          path: dist/*.whl
