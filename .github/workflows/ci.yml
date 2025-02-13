@@ -43,3 +43,9 @@ jobs:
         run: |
           source venv/bin/activate
           ./run test
+
+      - name: Build Wheel Files
+        run: |
+          source venv/bin/activate
+          mkdir -p .deb/
+          python setup.py bdist_wheel -d .deb/
