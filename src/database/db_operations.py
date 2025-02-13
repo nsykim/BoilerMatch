@@ -20,10 +20,11 @@ def connect_to_mongodb(database):
         logging.error('Error connecting to MongoDB: %s', error)
         return False, error
 
-def create_user(collection, email, pw_hash, preferences=None, user_info=None):
+def create_user(collection, email, pw_hash, school, preferences=None, user_info=None):
     new_user = {
         "email": email,
         "pwHash": pw_hash,
+        "school": school,
         "preferences": preferences,
         "userInfo": user_info
     }
