@@ -96,24 +96,24 @@ def autocomplete_colleges():
     
     return jsonify({"colleges": result}), status_code
 
-
 # FOR KNN
-@app.route('/users_by_school/<school>', methods=['GET'])
-def get_school_users(school):
-    table = accounts_db["accounts"]
-    success, result = get_users_by_school(school, table)
-    
-    if not success:
-        return jsonify({"error": "Failed to fetch users"}), 500
-    
-    if not result:
-        return jsonify({"error": "No users found"}), 404
-        
-    return jsonify({"users": result}), 200
+@app.route('/get_roommate_recommendations', methods=['GET'])
+def get_roommate_recommendations():
+    # Get required fields
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers['Authorization']
 
-# FOR KNN
-@app.route('/get_roommate_recommendations/<email>', methods=['GET'])
-def get_roommate_recommendations(email):
+    if email == None:
+        logging.info("login: malformed request... email not set")
+        return '', 400
+    logging.info("login: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("roommate_recommendations: invalid session token")
+        return session_token, 401
+    logging.info("roommate_recommendations: valid session token")
+
     # Get target user
     table = accounts_db["accounts"]
     success, target_user = get_user_by_email(email, table)
