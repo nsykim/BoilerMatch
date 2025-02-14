@@ -5,7 +5,7 @@ from database.db_operations import *
 import bcrypt
 from utils.jwt_utils import *
 from utils.fetch_colleges import fetch_colleges
-from utils.firebase import db
+from utils.firebase import *
 
 app = Flask(__name__)
 
@@ -154,11 +154,34 @@ def get_user_info():
     
     logging.info("user: %s", user)
     return jsonify(user), 200
-    
 
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    body = request.json
+    chat_id = body.get('chat_id') # frontend needs to get chat_id based on who they are texting
+    content = body.get('content')
+    session_token = request.headers['Authorization']
+    email = body.get('email')
+
+    if chat_id == None or content == None or email == None:
+        logging.info("send_message: malformed request... chat_id, content, or email were not set")
+        return '', 400
+    logging.info("send_message: all required fields were set") 
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("send_message: invalid session token")
+        return session_token, 401
+    logging.info("send_message: valid session token")
+
+    table = accounts_db["accounts"]
+    if send_message(chat_id, email, content, table):
+        logging.info("send_message: message sent successfully")
+        return '', 200
+    else:
+        logging.error("send_message: message could not be sent")
+        return '', 500
 
 accounts_db = None
-chats_db = None
 if __name__ == '__main__':
     success, accounts_db = connect_to_mongodb("accounts")
     if success == False:
