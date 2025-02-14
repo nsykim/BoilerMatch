@@ -47,7 +47,8 @@ def create_user(collection, email, pw_hash, preferences=empty_preferences, user_
         "email": email,
         "pwHash": pw_hash,
         "preferences": preferences,
-        "userInfo": user_info
+        "userInfo": user_info,
+        "chats": []
     }
     try:
         collection.insert_one(new_user)
