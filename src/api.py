@@ -5,6 +5,7 @@ from database.db_operations import *
 import bcrypt
 from utils.jwt_utils import *
 from utils.fetch_colleges import fetch_colleges
+from utils.firebase import db
 
 app = Flask(__name__)
 
@@ -127,6 +128,33 @@ def set_preferences():
     else:
         logging.error("set_preferences: preferences could not be updated")
         return session_token, 500
+
+@app.route('/get_user_info', methods=['POST'])
+def get_user_info():
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers['Authorization']
+
+    if email == None or session_token == None:
+        logging.info("get_user_info: malformed request... username, email, or pw were not set")
+        return session_token, 400
+    logging.info("get_user_info: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("get_user_info: invalid session token")
+        return session_token, 401
+    logging.info("get_user_info: valid session token")
+
+    table = accounts_db["accounts"]
+
+    success, user = get_user_by_email(email, table)
+    if success == False or user == None:
+        logging.info("get_user_info: error fetching user")
+        return session_token, 500
+    
+    logging.info("user: %s", user)
+    return jsonify(user), 200
+    
 
 
 accounts_db = None
