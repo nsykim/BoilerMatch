@@ -102,3 +102,17 @@ def update_chat(chat_id, collection, timetamp):
     except PyMongoError as error:
         logging.error('Error updating chat: %s', error)
         return False
+
+def sort_chats(collection, email):
+    try:
+        user = collection.find_one({"email": email}, {"chats": {"$slice": [0, 100]}})  # Limit results
+        if not user or "chats" not in user:
+            logging.info('No chats found for user %s', email)
+            return -1
+
+        sorted_chats = sorted(user["chats"], key=lambda x: x.get("lastUpdated", 0), reverse=True)
+        logging.info('Sorted chats for %s: %s', email, sorted_chats)
+        return sorted_chats
+    except PyMongoError as error:
+        logging.error('Error sorting chats: %s', error)
+        return None

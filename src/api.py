@@ -205,9 +205,39 @@ def open_chat():
         logging.error("open_chat: error fetching chat history")
         return '', 500
     logging.info("open_chat: chat history fetched successfully")
-    
+
 
     return jsonify(chat_history), 200
+
+@app.route('/chats_page', methods=['POST'])
+def chats_page():
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers['Authorization']
+
+    if email == None:
+        logging.info("chats_page: malformed request... email was not set")
+        return '', 400
+    logging.info("chats_page: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("chats_page: invalid session token")
+        return '', 401
+    logging.info("chats_page: valid session token")
+
+    table = accounts_db["accounts"]
+    
+    sorted_chats = sort_chats(table, email)
+    if sorted_chats == None:
+        logging.info("chats_page: error retrieving or sorting chats")
+        return '', 500
+    elif sorted_chats == -1:
+        logging.info("chats_page: no chats found")
+        return None, 200
+    else:
+        logging.info("chats_page: chats sorted successfully")
+        return jsonify(sorted_chats), 200 # WILL NEED TO UPDATE TO RETURN OTHER USER NAME NOT EMAIL
+    
 
 accounts_db = None
 if __name__ == '__main__':
