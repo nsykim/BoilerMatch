@@ -47,3 +47,14 @@ def send_message(chat_id, sender, content, collection):
     except Exception as e:
         logging.error("Error updating chat in mongo database: %s", e)
         return False
+
+def fetch_chat_history(chat_id):
+    try:
+        messages_ref = db.collection("chats").document(chat_id).collection("messages")
+        messages = messages_ref.order_by("timestamp").stream()
+        chat_history = [{"id": message.id, **message.to_dict()} for message in messages]
+        logging.info("Chat history fetched successfully")
+        return chat_history
+    except Exception as e:
+        logging.error("Error fetching chat history: %s", e)
+        return None

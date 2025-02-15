@@ -180,6 +180,34 @@ def send_message():
     else:
         logging.error("send_message: message could not be sent")
         return '', 500
+    
+
+@app.route('/open_chat', methods=['POST'])
+def open_chat():
+    body = request.json
+    chat_id = body.get('chat_id')
+    session_token = request.headers['Authorization']
+    email = body.get('email')
+
+    if chat_id == None or email == None:
+        logging.info("open_chat: malformed request... chat_id, content, or email were not set")
+        return '', 400
+    logging.info("open_chat: all required fields were set") 
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("open_chat: invalid session token")
+        return session_token, 401
+    logging.info("open_chat: valid session token")
+
+    chat_history = fetch_chat_history(chat_id)
+    
+    if chat_history == None:
+        logging.error("open_chat: error fetching chat history")
+        return '', 500
+    logging.info("open_chat: chat history fetched successfully")
+    
+
+    return jsonify(chat_history), 200
 
 accounts_db = None
 if __name__ == '__main__':
