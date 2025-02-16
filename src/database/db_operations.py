@@ -90,12 +90,10 @@ def update_preferences(user, preferences, collection, email):
 
 def update_chat(chat_id, collection, timetamp):
     try:
-        collection.update_many({
-            {"chats.chat_id": chat_id}
-        }, {
-            "$set": {
-                "chats.$.lastUpdated": timetamp
-                
+        collection.update_many(
+            {"chats.chat_id": chat_id}, 
+            { "$set": {
+                "chats.$.lastUpdated": timetamp 
             }
         })
         return True

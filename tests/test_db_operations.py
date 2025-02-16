@@ -12,7 +12,9 @@ with patch('pymongo.MongoClient'):
         create_user,
         remove_user,
         get_user_by_email,
-        update_preferences
+        update_preferences,
+        sort_chats,
+        update_chat
     )
 
 from pymongo.errors import PyMongoError
@@ -298,6 +300,97 @@ class TestDatabaseOperations(unittest.TestCase):
         
         self.assertFalse(success)
         self.assertNotEqual(user["preferences"], new_preferences)
+
+    def test_update_chat_success(self):
+        """Test successful chat update."""
+        # Configure mock
+        chat_id = "test_chat_123"
+        timestamp = 1234567890
+        self.mock_collection.update_many.return_value.modified_count = 1
+        
+        # Execute test
+        success = update_chat(chat_id, self.mock_collection, timestamp)
+        
+        # Assertions
+        self.assertTrue(success)
+        self.mock_collection.update_many.assert_called_once_with(
+            {"chats.chat_id": chat_id},
+            {"$set": {"chats.$.lastUpdated": timestamp}}
+        )
+
+def test_update_chat_failure(self):
+    """Test chat update failure due to database error."""
+    # Configure mock to raise exception
+    chat_id = "test_chat_123"
+    timestamp = 1234567890
+    self.mock_collection.update_many.side_effect = PyMongoError("Update failed")
+    
+    # Execute test
+    success = update_chat(chat_id, self.mock_collection, timestamp)
+    
+    # Assertions
+    self.assertFalse(success)
+
+def test_sort_chats_success(self):
+    """Test successful chat sorting."""
+    # Test data
+    email = "test@example.com"
+    test_chats = [
+        {"chat_id": "chat1", "lastUpdated": 1000},
+        {"chat_id": "chat2", "lastUpdated": 3000},
+        {"chat_id": "chat3", "lastUpdated": 2000}
+    ]
+    mock_user = {"email": email, "chats": test_chats}
+    
+    # Configure mock
+    self.mock_collection.find_one.return_value = mock_user
+    
+    # Execute test
+    result = sort_chats(self.mock_collection, email)
+    
+    # Assertions
+    self.assertIsNotNone(result)
+    self.assertEqual(len(result), 3)
+    self.assertEqual(result[0]["chat_id"], "chat2")  # Most recent first
+    self.assertEqual(result[1]["chat_id"], "chat3")
+    self.assertEqual(result[2]["chat_id"], "chat1")
+    self.mock_collection.find_one.assert_called_once_with(
+        {"email": email},
+        {"chats": {"$slice": [0, 100]}}
+    )
+
+def test_sort_chats_no_chats(self):
+    """Test sorting when user has no chats."""
+    # Configure mock to return user without chats
+    self.mock_collection.find_one.return_value = {"email": "test@example.com"}
+    
+    # Execute test
+    result = sort_chats(self.mock_collection, "test@example.com")
+    
+    # Assertions
+    self.assertEqual(result, -1)
+
+def test_sort_chats_user_not_found(self):
+    """Test sorting when user doesn't exist."""
+    # Configure mock to return None (user not found)
+    self.mock_collection.find_one.return_value = None
+    
+    # Execute test
+    result = sort_chats(self.mock_collection, "test@example.com")
+    
+    # Assertions
+    self.assertEqual(result, -1)
+
+def test_sort_chats_failure(self):
+    """Test sorting failure due to database error."""
+    # Configure mock to raise exception
+    self.mock_collection.find_one.side_effect = PyMongoError("Find failed")
+    
+    # Execute test
+    result = sort_chats(self.mock_collection, "test@example.com")
+    
+    # Assertions
+    self.assertIsNone(result)
 
 if __name__ == "__main__":
   unittest.main()
