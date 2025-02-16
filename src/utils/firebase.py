@@ -44,6 +44,7 @@ def send_message(chat_id, sender, content, collection):
             logging.error("Error updating chat in mongo database")
             return False
         logging.info("Chat updated successfully in mongo")
+        return True
     except Exception as e:
         logging.error("Error updating chat in mongo database: %s", e)
         return False
