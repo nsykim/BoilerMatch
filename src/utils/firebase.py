@@ -3,8 +3,10 @@ from firebase_admin import credentials, firestore
 from dotenv import load_dotenv  
 import time
 import json
+import sys
 import os
 import logging
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.database.db_operations import update_chat
 
 load_dotenv()
