@@ -140,6 +140,7 @@ def get_roommate_recommendations():
     return jsonify({
         "recommendations": formatted_recommendations
     }), 200
+
 @app.route('/set_preferences', methods=['POST'])
 def set_preferences():
     body = request.json
