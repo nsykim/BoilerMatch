@@ -133,7 +133,7 @@ def add_like(collection, email1, email2):
             return match_users(collection, email1, email2)
         
         # user2 has not already swiped on user 1, so add user1 to user2 likes
-        collection.update_one({"email": email1}, {"$addToSet": {"likes": email2}})
+        collection.update_one({"email": email2}, {"$addToSet": {"likes": email1}})
 
         logging.info('Likes added for %s and %s', email1, email2)
         return True, 1
@@ -164,6 +164,7 @@ def match_users(collection, email1, email2):
         try:
             collection.update_one({"email": email1}, {"$set": {"chats": user1['chats']}})
             collection.update_one({"email": email2}, {"$set": {"chats": user2['chats']}})
+            collection.update_one({"email": email1}, {"$pull": {"likes": email2}})
             logging.info('Match users: successfully updated both users')
             return True, chatID
         except PyMongoError as error:

@@ -423,7 +423,7 @@ class TestDatabaseOperations(unittest.TestCase):
             self.assertEqual(len(chat_id), 16)
             
             # Verify update_one calls
-            self.assertEqual(self.mock_collection.update_one.call_count, 2)
+            self.assertEqual(self.mock_collection.update_one.call_count, 3)
             
             calls = self.mock_collection.update_one.call_args_list
             
@@ -540,8 +540,8 @@ class TestDatabaseOperations(unittest.TestCase):
         self.assertTrue(success)
         self.assertEqual(result, 1)
         self.mock_collection.update_one.assert_called_once_with(
-            {"email": email1},
-            {"$addToSet": {"likes": email2}}
+            {"email": email2},
+            {"$addToSet": {"likes": email1}}
         )
 
     def test_add_like_mutual_match(self):
@@ -627,8 +627,8 @@ class TestDatabaseOperations(unittest.TestCase):
         self.assertTrue(success)
         self.assertEqual(result, 1)
         self.mock_collection.update_one.assert_called_once_with(
-            {"email": email1},
-            {"$addToSet": {"likes": email2}}
+            {"email": email2},
+            {"$addToSet": {"likes": email1}}
         )
 
 if __name__ == "__main__":
