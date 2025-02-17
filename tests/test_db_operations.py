@@ -16,6 +16,7 @@ with patch('pymongo.MongoClient'):
         update_preferences,
         sort_chats,
         update_chat,
+        add_like,
         match_users
     )
 
@@ -520,6 +521,115 @@ class TestDatabaseOperations(unittest.TestCase):
             self.assertIsInstance(error, PyMongoError)
             self.assertEqual(str(error), "Failed to update user")
 
+    def test_add_like_success(self):
+        """Test successful addition of a like when there's no mutual like."""
+        # Test data
+        email1 = "test1@example.com"
+        email2 = "test2@example.com"
+        
+        # Configure mocks
+        self.mock_collection.find_one.side_effect = [
+            {"email": email1, "likes": []},  # user1
+            {"email": email2, "likes": []}   # user2
+        ]
+        
+        # Execute test
+        success, result = add_like(self.mock_collection, email1, email2)
+        
+        # Assertions
+        self.assertTrue(success)
+        self.assertEqual(result, 1)
+        self.mock_collection.update_one.assert_called_once_with(
+            {"email": email1},
+            {"$addToSet": {"likes": email2}}
+        )
+
+    def test_add_like_mutual_match(self):
+        """Test when adding a like results in a mutual match."""
+        email1 = "test1@example.com"
+        email2 = "test2@example.com"
+        expected_chat_id = hashlib.sha256("_".join(sorted([email1, email2])).encode()).hexdigest()[:16]
+        
+        # Configure mocks for initial like check
+        self.mock_collection.find_one.side_effect = [
+            {"email": email1, "likes": [email2]},
+            {"email": email2, "likes": []}
+        ]
+        
+        # Mock match_users at the correct import level
+        with patch('database.db_operations.match_users', return_value=(True, expected_chat_id)):
+            # Import the function after patching
+            from database.db_operations import add_like
+            
+            # Execute test
+            success, result = add_like(self.mock_collection, email1, email2)
+            
+            # Assertions
+            self.assertTrue(success)
+            self.assertEqual(result, expected_chat_id)
+            self.assertEqual(len(result), 16)
+
+
+    def test_add_like_user_not_found(self):
+        """Test when one of the users doesn't exist."""
+        email1 = "test1@example.com"
+        email2 = "test2@example.com"
+        
+        # Configure mock to return None for user2
+        self.mock_collection.find_one.side_effect = [
+            {"email": email1, "likes": []},
+            None
+        ]
+        
+        # Execute test
+        success, result = add_like(self.mock_collection, email1, email2)
+        
+        # Assertions
+        self.assertFalse(success)
+        self.assertEqual(result, 1)
+        self.mock_collection.update_one.assert_not_called()
+
+    def test_add_like_database_error(self):
+        """Test handling of database errors during like addition."""
+        email1 = "test1@example.com"
+        email2 = "test2@example.com"
+        
+        # Configure mocks
+        self.mock_collection.find_one.side_effect = [
+            {"email": email1, "likes": []},
+            {"email": email2, "likes": []}
+        ]
+        self.mock_collection.update_one.side_effect = PyMongoError("Update failed")
+        
+        # Execute test
+        success, error = add_like(self.mock_collection, email1, email2)
+        
+        # Assertions
+        self.assertFalse(success)
+        self.assertIsInstance(error, PyMongoError)
+        self.assertEqual(str(error), "Update failed")
+
+    def test_add_like_empty_likes_array(self):
+        """Test adding a like when the likes array doesn't exist yet."""
+        email1 = "test1@example.com"
+        email2 = "test2@example.com"
+        
+        # Configure mocks - user1 doesn't have a likes array yet
+        self.mock_collection.find_one.side_effect = [
+            {"email": email1},  # No likes array
+            {"email": email2, "likes": []}
+        ]
+        
+        # Execute test
+        success, result = add_like(self.mock_collection, email1, email2)
+        
+        # Assertions
+        self.assertTrue(success)
+        self.assertEqual(result, 1)
+        self.mock_collection.update_one.assert_called_once_with(
+            {"email": email1},
+            {"$addToSet": {"likes": email2}}
+        )
 
 if __name__ == "__main__":
   unittest.main()

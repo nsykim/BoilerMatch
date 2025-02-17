@@ -241,8 +241,8 @@ def chats_page():
         return jsonify(sorted_chats), 200 # WILL NEED TO UPDATE TO RETURN OTHER USER NAME NOT EMAIL
 
 
-@app.route('/match', methods=['POST'])
-def match():
+@app.route('/like', methods=['POST'])
+def like():
     body = request.json
     email = body.get('email')
     other = body.get('other')    
@@ -259,16 +259,24 @@ def match():
     logging.info("match: valid session token")
 
     table = accounts_db["accounts"]
-    success, id = match_users(table, email, other)
-    if success == False and id == -1:
-        logging.info("match: chat already exists")
+    success, id = add_like(table, email, other)
+    if success == False and (id == 1 or id == -2):
+        logging.info("match: error fetching user")
+        return '', 500
+    elif success == False and id == -1:
+        logging.info("match: users have already been matched")
         return '', 403
-    elif success == False:
+    elif success == False and type(id) == PyMongoError:
         logging.info("match: error matching users")
         return '', 500
-    else:
-        logging.info("match: users matched successfully")
-        return jsonify({"chat_id": id}), 200 
+    elif success == True and id == 1:
+        logging.info("match: added like onto %s", other)
+        return '', 200
+    elif success == True:
+        logging.info("match: users matched")
+        return '', 200
+
+
 
 accounts_db = None
 if __name__ == '__main__':

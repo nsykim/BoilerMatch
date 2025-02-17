@@ -50,7 +50,9 @@ def create_user(collection, email, pw_hash, preferences=empty_preferences, user_
         "pwHash": pw_hash,
         "preferences": preferences,
         "userInfo": user_info,
-        "chats": []
+        "chats": [],
+        "likes": []
+
     }
     try:
         collection.insert_one(new_user)
@@ -116,6 +118,28 @@ def sort_chats(collection, email):
     except PyMongoError as error:
         logging.error('Error sorting chats: %s', error)
         return None
+
+def add_like(collection, email1, email2):
+    try:
+        user1 = collection.find_one({"email": email1})
+        user2 = collection.find_one({"email": email2})
+
+        if not user1 or not user2:
+            logging.info('One or both users not found')
+            return False, 1
+
+        if email2 in user1.get("likes", []): # if other person already swiped on you
+            logging.info('Users like eachother - match')
+            return match_users(collection, email1, email2)
+        
+        # user2 has not already swiped on user 1, so add user1 to user2 likes
+        collection.update_one({"email": email1}, {"$addToSet": {"likes": email2}})
+
+        logging.info('Likes added for %s and %s', email1, email2)
+        return True, 1
+    except PyMongoError as error:
+        logging.error('Error adding likes: %s', error)
+        return False, error
 
 def match_users(collection, email1, email2):
     try:
