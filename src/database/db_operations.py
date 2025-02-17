@@ -3,6 +3,8 @@ import os
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 from dotenv import load_dotenv
+import hashlib
+import time
 
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
@@ -114,3 +116,35 @@ def sort_chats(collection, email):
     except PyMongoError as error:
         logging.error('Error sorting chats: %s', error)
         return None
+
+def match_users(collection, email1, email2):
+    try:
+        success1, user1 = get_user_by_email(email1, collection)
+        success2, user2 = get_user_by_email(email2, collection)
+        if success1 == False or success2 == False:
+            logging.info('Match users: one or both users not found')
+            return False, -2
+        logging.info('Match users: successfully retrieved both users')
+        emails = sorted([email1, email2])
+        chatID = hashlib.sha256("_".join(emails).encode()).hexdigest()[:16]
+
+        if any(chat.get('chat_id') == chatID for chat in user1.get('chats', [])) or \
+           any(chat.get('chat_id') == chatID for chat in user2.get('chats', [])):
+            logging.info('Match users: chatID already exists')
+            return False, -1
+        
+        logging.info('Match users: generated chatID %s', chatID)
+        matchTime = int(time.time())
+        user1['chats'].append({"chat_id" : chatID, "lastUpdated" : matchTime})
+        user2['chats'].append({"chat_id" : chatID, "lastUpdated" : matchTime})
+        try:
+            collection.update_one({"email": email1}, {"$set": {"chats": user1['chats']}})
+            collection.update_one({"email": email2}, {"$set": {"chats": user2['chats']}})
+            logging.info('Match users: successfully updated both users')
+            return True, chatID
+        except PyMongoError as error:
+            logging.error('Error updating users with chatID: %s', error)
+            return False, error
+    except PyMongoError as error:
+        logging.error('Error matching users: %s', error)
+        return False, error

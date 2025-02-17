@@ -5,7 +5,9 @@ from database.db_operations import *
 import bcrypt
 from utils.jwt_utils import *
 from utils.fetch_colleges import fetch_colleges
+import time
 from utils.firebase import *
+import hashlib
 
 app = Flask(__name__)
 
@@ -237,7 +239,36 @@ def chats_page():
     else:
         logging.info("chats_page: chats sorted successfully")
         return jsonify(sorted_chats), 200 # WILL NEED TO UPDATE TO RETURN OTHER USER NAME NOT EMAIL
-    
+
+
+@app.route('/match', methods=['POST'])
+def match():
+    body = request.json
+    email = body.get('email')
+    other = body.get('other')    
+    session_token = request.headers['Authorization']
+
+    if email == None:
+        logging.info("match: malformed request... email was not set")
+        return '', 400
+    logging.info("match: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("match: invalid session token")
+        return session_token, 401
+    logging.info("match: valid session token")
+
+    table = accounts_db["accounts"]
+    success, id = match_users(table, email, other)
+    if success == False and id == -1:
+        logging.info("match: chat already exists")
+        return '', 403
+    elif success == False:
+        logging.info("match: error matching users")
+        return '', 500
+    else:
+        logging.info("match: users matched successfully")
+        return jsonify({"chat_id": id}), 200 
 
 accounts_db = None
 if __name__ == '__main__':
