@@ -106,11 +106,11 @@ def get_roommate_recommendations():
         return '', 400
     logging.info("login: all required fields were set")
 
-    # if validate_jwt(session_token)['email'] != email:
-    #     logging.info("roommate_recommendations: invalid session token")
-    #     return session_token, 401
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("roommate_recommendations: invalid session token")
+        return jsonify({"error": "Unauthorized"}), 401
     logging.info("roommate_recommendations: valid session token")
-
+    
     # Get target user
     table = accounts_db["accounts"]
     success, target_user = get_user_by_email(email, table)

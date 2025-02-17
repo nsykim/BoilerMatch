@@ -91,6 +91,7 @@ def get_users_by_school(school, collection, limit=100):
             # Project only the fields we want to return
             {"$project": {
                 "email": 1,
+                "school": 1,
                 "userInfo": 1,
                 "preferences": 1,
                 "_id": 0  # Exclude the MongoDB _id field
