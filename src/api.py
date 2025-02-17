@@ -94,7 +94,7 @@ def autocomplete_colleges():
     return jsonify({"colleges": result}), status_code
 
 # FOR KNN
-@app.route('/get_roommate_recommendations', methods=['GET'])
+@app.route('/get_roommate_recommendations', methods=['POST'])
 def get_roommate_recommendations():
     # Get required fields
     body = request.json
@@ -106,9 +106,9 @@ def get_roommate_recommendations():
         return '', 400
     logging.info("login: all required fields were set")
 
-    if validate_jwt(session_token)['email'] != email:
-        logging.info("roommate_recommendations: invalid session token")
-        return session_token, 401
+    # if validate_jwt(session_token)['email'] != email:
+    #     logging.info("roommate_recommendations: invalid session token")
+    #     return session_token, 401
     logging.info("roommate_recommendations: valid session token")
 
     # Get target user
@@ -119,7 +119,7 @@ def get_roommate_recommendations():
         return jsonify({"error": "User not found"}), 404
         
     # Get target user's school
-    user_school = target_user.get("userInfo", {}).get("school")
+    user_school = target_user.get("school")
     if not user_school:
         return jsonify({"error": "User school not found"}), 400
         

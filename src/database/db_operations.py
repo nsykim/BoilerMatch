@@ -85,7 +85,7 @@ def get_users_by_school(school, collection, limit=100):
         # Using aggregation pipeline to first match by school then get random sample
         pipeline = [
             # Match users where userInfo.school equals the provided school
-            {"$match": {"userInfo.school": school}},
+            {"$match": {"school": school}},
             # Get random sample of matched documents
             {"$sample": {"size": limit}},
             # Project only the fields we want to return

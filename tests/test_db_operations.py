@@ -234,17 +234,17 @@ class TestDatabaseOperations(unittest.TestCase):
         test_users = [
             {
                 "email": "user1@test.com",
-                "userInfo": {"school": "Purdue"},
+                "school": "Purdue",
                 "preferences": {"Cleanliness": 3}
             },
             {
                 "email": "user2@test.com",
-                "userInfo": {"school": "Purdue"},
+                "school": "Purdue",
                 "preferences": {"Cleanliness": 4}
             },
             {
                 "email": "user3@test.com",
-                "userInfo": {"school": "IU"},
+                "school": "IU",
                 "preferences": {"Cleanliness": 5}
             }
         ]
@@ -264,7 +264,7 @@ class TestDatabaseOperations(unittest.TestCase):
         # Verify the aggregation pipeline
         pipeline_arg = self.mock_collection.aggregate.call_args[0][0]
         self.assertEqual(len(pipeline_arg), 3)  # Match, Sample, and Project stages
-        self.assertEqual(pipeline_arg[0]["$match"], {"userInfo.school": "Purdue"})
+        self.assertEqual(pipeline_arg[0]["$match"], {"school": "Purdue"})
         self.assertEqual(pipeline_arg[1]["$sample"], {"size": 100})  # Default limit
         self.assertEqual(pipeline_arg[2]["$project"], {
             "email": 1,
