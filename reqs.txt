@@ -8,3 +8,6 @@ coverage
 pyjwt
 subprocess.run
 requests
+numpy
+scikit-learn
+typing

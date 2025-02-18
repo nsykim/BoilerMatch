@@ -12,7 +12,8 @@ with patch('pymongo.MongoClient'):
         create_user,
         remove_user,
         get_user_by_email,
-        update_preferences
+        update_preferences,
+        get_users_by_school
     )
 
 from pymongo.errors import PyMongoError
@@ -46,12 +47,13 @@ class TestDatabaseOperations(unittest.TestCase):
         self.mock_mongo_client = self.mongo_patcher.start()
 
         # Import after patching
-        global connect_to_mongodb, create_user, remove_user, get_user_by_email
+        global connect_to_mongodb, create_user, remove_user, get_user_by_email, get_users_by_school
         from database.db_operations import (
             connect_to_mongodb,
             create_user,
             remove_user,
-            get_user_by_email
+            get_user_by_email,
+            get_users_by_school
         )
 
     def tearDown(self):
@@ -101,12 +103,13 @@ class TestDatabaseOperations(unittest.TestCase):
         # Test data
         email = "test@example.com"
         pw_hash = "test_hash"
+        school = "Purdue University"
         
         # Configure mock
         self.mock_collection.insert_one.return_value.inserted_id = "123"
         
         # Execute test
-        success, result = create_user(self.mock_collection, email, pw_hash)
+        success, result = create_user(self.mock_collection, email, pw_hash, school)
         
         # Assertions
         self.assertTrue(success)
@@ -122,6 +125,8 @@ class TestDatabaseOperations(unittest.TestCase):
         """Test user creation with preferences and user info."""
         # Test data
         email = "test@example.com"
+        pw_hash = "test_hash"
+        school = "IU"
         preferences = {"theme": "dark"}
         user_info = {"name": "Test User"}
         
@@ -129,7 +134,8 @@ class TestDatabaseOperations(unittest.TestCase):
         success, result = create_user(
             self.mock_collection,
             email,
-            "hash",
+            pw_hash,
+            school,
             preferences=preferences,
             user_info=user_info
         )
@@ -222,7 +228,87 @@ class TestDatabaseOperations(unittest.TestCase):
         self.assertIsInstance(error, PyMongoError)
         self.assertEqual(str(error), "Find failed")
 
+    def test_get_users_by_school_success(self):
+        """Test successful retrieval of users by school."""
+        # Test data
+        test_users = [
+            {
+                "email": "user1@test.com",
+                "school": "Purdue",
+                "preferences": {"Cleanliness": 3}
+            },
+            {
+                "email": "user2@test.com",
+                "school": "Purdue",
+                "preferences": {"Cleanliness": 4}
+            },
+            {
+                "email": "user3@test.com",
+                "school": "IU",
+                "preferences": {"Cleanliness": 5}
+            }
+        ]
+        
+        # Configure mock to return test data
+        self.mock_collection.aggregate.return_value = test_users[:2]  # Only Purdue users
+        
+        # Execute test
+        success, users = get_users_by_school("Purdue", self.mock_collection)
+        
+        # Assertions
+        self.assertTrue(success)
+        self.assertEqual(len(users), 2)
+        self.assertEqual(users[0]["email"], "user1@test.com")
+        self.assertEqual(users[1]["email"], "user2@test.com")
+        
+        # Verify the aggregation pipeline
+        pipeline_arg = self.mock_collection.aggregate.call_args[0][0]
+        self.assertEqual(len(pipeline_arg), 3)  # Match, Sample, and Project stages
+        self.assertEqual(pipeline_arg[0]["$match"], {"school": "Purdue"})
+        self.assertEqual(pipeline_arg[1]["$sample"], {"size": 100})  # Default limit
+        self.assertEqual(pipeline_arg[2]["$project"], {
+            "email": 1,
+            "userInfo": 1,
+            "preferences": 1,
+            "_id": 0
+        })
 
+    def test_get_users_by_school_custom_limit(self):
+        """Test getting users by school with custom limit."""
+        # Configure mock
+        self.mock_collection.aggregate.return_value = []
+        
+        # Execute test
+        success, users = get_users_by_school("Purdue", self.mock_collection, limit=50)
+        
+        # Verify the limit in aggregation pipeline
+        pipeline_arg = self.mock_collection.aggregate.call_args[0][0]
+        self.assertEqual(pipeline_arg[1]["$sample"], {"size": 50})
+
+    def test_get_users_by_school_empty_result(self):
+        """Test when no users are found for a school."""
+        # Configure mock to return empty list
+        self.mock_collection.aggregate.return_value = []
+        
+        # Execute test
+        success, users = get_users_by_school("NonexistentSchool", self.mock_collection)
+        
+        # Assertions
+        self.assertTrue(success)
+        self.assertEqual(len(users), 0)
+
+    def test_get_users_by_school_failure(self):
+        """Test handling of database errors."""
+        # Configure mock to raise exception
+        self.mock_collection.aggregate.side_effect = PyMongoError("Aggregation failed")
+        
+        # Execute test
+        success, error = get_users_by_school("Purdue", self.mock_collection)
+        
+        # Assertions
+        self.assertFalse(success)
+        self.assertIsInstance(error, PyMongoError)
+        self.assertEqual(str(error), "Aggregation failed")
 
     def test_update_preferences_success(self):
         # Configure mock for successful preferences update

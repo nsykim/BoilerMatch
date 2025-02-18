@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b6f93674-31e7-4b78-a650-acaab00eacfa",
+		"_postman_id": "f53dcc2f-93f6-4ad7-a30e-0752ee7380df",
 		"name": "BoilerMatch",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "40185812"
+		"_exporter_id": "42236287"
 	},
 	"item": [
 		{
@@ -349,165 +349,197 @@
 		{
 			"name": "autocomplete_colleges success",
 			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Status code is 200\", function () {",
-					"    pm.response.to.have.status(200);",
-					"});",
-					"",
-					"pm.test(\"Response has colleges array\", function () {",
-					"    const responseData = pm.response.json();",
-					"    pm.expect(responseData).to.have.property('colleges');",
-					"    pm.expect(responseData.colleges).to.be.an('array');",
-					"});",
-					"",
-					"pm.test(\"Colleges match search query\", function () {",
-					"    const responseData = pm.response.json();",
-					"    const query = pm.request.url.query.get('q').toLowerCase();",
-					"    responseData.colleges.forEach(function(college) {",
-					"        pm.expect(college.toLowerCase()).to.include(query);",
-					"    });",
-					"});"
-				  ],
-				  "type": "text/javascript"
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has colleges array\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('colleges');",
+							"    pm.expect(responseData.colleges).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Colleges match search query\", function () {",
+							"    const responseData = pm.response.json();",
+							"    const query = pm.request.url.query.get('q').toLowerCase();",
+							"    responseData.colleges.forEach(function(college) {",
+							"        pm.expect(college.toLowerCase()).to.include(query);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			  }
 			],
 			"request": {
-			  "method": "GET",
-			  "header": [],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/autocomplete_colleges?q=purdue",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["autocomplete_colleges"],
-				"query": [
-				  {
-					"key": "q",
-					"value": "purdue"
-				  }
-				]
-			  }
-			}
-		  },
-		  {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3020/autocomplete_colleges?q=purdue",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"autocomplete_colleges"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "purdue"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "autocomplete_colleges fail: empty query",
 			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Response status code is 400\", function () {",
-					"    pm.response.to.have.status(400);",
-					"});",
-					"",
-					"pm.test(\"Error message mentions query parameter\", function () {",
-					"    pm.expect(pm.response.text()).to.include('Query parameter');",
-					"});"
-				  ],
-				  "type": "text/javascript"
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Error message mentions query parameter\", function () {",
+							"    pm.expect(pm.response.text()).to.include('Query parameter');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			  }
 			],
 			"request": {
-			  "method": "GET",
-			  "header": [],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/autocomplete_colleges",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["autocomplete_colleges"]
-			  }
-			}
-		  },
-		  {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3020/autocomplete_colleges",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"autocomplete_colleges"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "get_roommate_recommendations success",
 			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Status code is 200\", function () {",
-					"    pm.response.to.have.status(200);",
-					"});",
-					"",
-					"pm.test(\"Response has recommendations array\", function () {",
-					"    const responseData = pm.response.json();",
-					"    pm.expect(responseData).to.have.property('recommendations');",
-					"    pm.expect(responseData.recommendations).to.be.an('array');",
-					"});",
-					"",
-					"pm.test(\"Each recommendation has required properties\", function () {",
-					"    const responseData = pm.response.json();",
-					"    responseData.recommendations.forEach(function(recommendation) {",
-					"        pm.expect(recommendation).to.have.property('email');",
-					"        pm.expect(recommendation).to.have.property('compatibility_score');",
-					"        pm.expect(recommendation.compatibility_score).to.be.within(0, 100);",
-					"    });",
-					"});"
-				  ],
-				  "type": "text/javascript"
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has recommendations array\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('recommendations');",
+							"    pm.expect(responseData.recommendations).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Each recommendation has required properties\", function () {",
+							"    const responseData = pm.response.json();",
+							"    responseData.recommendations.forEach(function(recommendation) {",
+							"        pm.expect(recommendation).to.have.property('email');",
+							"        pm.expect(recommendation).to.have.property('compatibility_score');",
+							"        pm.expect(recommendation.compatibility_score).to.be.within(0, 100);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			  }
 			],
 			"request": {
-			  "method": "GET",
-			  "header": [
-				{
-				  "key": "Authorization",
-				  "value": "{{session_token}}",
-				  "type": "text"
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{session_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:3020/get_roommate_recommendations",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"get_roommate_recommendations"
+					]
 				}
-			  ],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/get_roommate_recommendations",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["get_roommate_recommendations"]
-			  }
-			}
-		  },
-		  {
+			},
+			"response": []
+		},
+		{
 			"name": "get_roommate_recommendations fail: unauthorized",
 			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Response status code is 401\", function () {",
-					"    pm.response.to.have.status(401);",
-					"});",
-					"",
-					"pm.test(\"Error message mentions authentication\", function () {",
-					"    pm.expect(pm.response.text()).to.include('unauthorized');",
-					"});"
-				  ],
-				  "type": "text/javascript"
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Error message mentions authentication\", function () {",
+							"    pm.expect(pm.response.text()).to.include('unauthorized');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
-			  }
 			],
 			"request": {
-			  "method": "GET",
-			  "header": [
-				{
-				  "key": "Authorization",
-				  "value": "invalid-token",
-				  "type": "text"
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "invalid-token",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:3020/get_roommate_recommendations",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"get_roommate_recommendations"
+					]
 				}
-			  ],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/get_roommate_recommendations",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["get_roommate_recommendations"]
-			  }
-			}
+			},
+			"response": []
 		}
 	]
 }

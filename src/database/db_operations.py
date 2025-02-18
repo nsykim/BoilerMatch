@@ -42,10 +42,11 @@ def connect_to_mongodb(database):
         logging.error('Error connecting to MongoDB: %s', error)
         return False, error
 
-def create_user(collection, email, pw_hash, preferences=empty_preferences, user_info=None):
+def create_user(collection, email, pw_hash, school, preferences=empty_preferences, user_info=None):
     new_user = {
         "email": email,
         "pwHash": pw_hash,
+        "school": school,
         "preferences": preferences,
         "userInfo": user_info
     }
@@ -76,6 +77,38 @@ def get_user_by_email(email, collection):
         return True, user
     except PyMongoError as error:
         logging.error('Error fetching user: %s', error)
+        return False, error
+
+# FOR KNN
+def get_users_by_school(school, collection, limit=100):
+    try:
+        # Using aggregation pipeline to first match by school then get random sample
+        pipeline = [
+            # Match users where userInfo.school equals the provided school
+            {"$match": {"school": school}},
+            # Get random sample of matched documents
+            {"$sample": {"size": limit}},
+            # Project only the fields we want to return
+            {"$project": {
+                "email": 1,
+                "school": 1,
+                "userInfo": 1,
+                "preferences": 1,
+                "_id": 0  # Exclude the MongoDB _id field
+            }}
+        ]
+        
+        users = list(collection.aggregate(pipeline))
+        
+        if not users:
+            logging.info('No users found for school: %s', school)
+            return True, []
+        
+        logging.info('Found %d users for school: %s', len(users), school)
+        return True, users
+        
+    except PyMongoError as error:
+        logging.error('Error fetching users by school: %s', error)
         return False, error
 
 def update_preferences(user, preferences, collection, email):
