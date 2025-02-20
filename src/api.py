@@ -6,8 +6,16 @@ import bcrypt
 from utils.jwt_utils import *
 from models.roommate_recommender import RoommateRecommender
 from utils.fetch_colleges import fetch_colleges
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={
+    r"/*": {
+        "origins": ["*"],  # CHANGE WHEN IN PROD
+        "methods": ["GET", "POST", "DELETE"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 @app.route('/delete_account/<email>', methods=['DELETE'])
 def delete_account(email):
@@ -25,6 +33,10 @@ def create_account():
     email = body.get('email')
     pw = body.get('password')
     school = body.get('school')
+
+    logging.info(f"email: {email}")
+    logging.info(f"password: {pw}")
+    logging.info(f"school: {school}")
 
     if len(pw) < 8:
         logging.info("create_account: password is too short")
@@ -48,12 +60,12 @@ def create_account():
     success, result = create_user(table, email, hashed_pw, school) 
     if success == True:
         logging.info("create_account: account successfully created")
-        return '', 200
+        return jsonify({"message": "account success"}), 200
     else:
         logging.error("create_account: account could not be created")
         return '', 500
 
-@app.route('/login', methods=['GET'])
+@app.route('/login', methods=['POST'])
 def login():
     body = request.json
     email = body.get('email')
@@ -184,4 +196,4 @@ if __name__ == '__main__':
     if success == False:
         logging.error("could not connect to the database")
         exit(1)
-    app.run(port=3020, debug=True)
+    app.run(host="0.0.0.0", port=3020, debug=True)

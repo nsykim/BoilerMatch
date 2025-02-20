@@ -66,6 +66,16 @@ def remove_user(email, collection):
     except PyMongoError as error:
         logging.error('Error removing user: %s', error)
         return False
+    
+def remove_all_users(collection):
+    try:
+        result = collection.delete_many({})
+        deleted_count = result.deleted_count
+        logging.info('Removed %d users from the database', deleted_count)
+        return True, deleted_count
+    except PyMongoError as error:
+        logging.error('Error removing all users: %s', error)
+        return False, error
 
 def get_user_by_email(email, collection):
     try:

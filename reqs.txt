@@ -11,3 +11,4 @@ requests
 numpy
 scikit-learn
 typing
+flask-cors

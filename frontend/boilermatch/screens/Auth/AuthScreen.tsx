@@ -1,0 +1,165 @@
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
+import React, { useState } from 'react'
+import { darkTheme } from '@/styles/theme'
+import { apiPost } from '@/api/api'
+import { useAuth } from '@/contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_+-])[A-Za-z\d!@#$%^&*(),.?":{}|<>_+-]{8,64}$/
+
+const AuthScreen = () => {
+  const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [school, setSchool] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { setToken } = useAuth()
+  const [sesh, setSesh] = useState()
+
+  const handleRegister = async () => {
+    if (!emailRegex.test(email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      Alert.alert(
+        'Weak Password',
+        'Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.'
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await apiPost('/create_account', { email, password, school });
+
+      Alert.alert('Success', 'Account created! You can now log in.');
+      setIsLogin(true); // Switch to login mode after registration
+    } catch (error: any) {
+      Alert.alert('Error', error?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!emailRegex.test(email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { session_token: token } = await apiPost('/login', { email, password });
+
+      setToken(token);
+      await AsyncStorage.setItem("session_token", token)
+      // route them to swipe screen
+      
+      setSesh(token)
+      Alert.alert('Success', 'Logged in!');
+    } catch (error: any) {
+      Alert.alert('Error', error?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} bounces={true} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <Text style={styles.header}>{isLogin ? 'Login' : 'Register'}</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor={darkTheme.text}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor={darkTheme.text}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          {!isLogin && <TextInput
+            style={styles.input}
+            placeholder="School"
+            placeholderTextColor={darkTheme.text}
+            value={school}
+            onChangeText={setSchool}
+          />}
+
+          <TouchableOpacity style={styles.button} onPress={isLogin ? handleLogin : handleRegister} disabled={loading}>
+            <Text style={styles.buttonText}>{loading ? 'Loading...' : isLogin ? 'Login' : 'Register'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+            <Text style={styles.switchText}>{isLogin ? "Don't have an account? Register" : "Already have an account? Login"}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>{sesh}</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  )
+}
+
+export default AuthScreen
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: darkTheme.background,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: darkTheme.text,
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    borderWidth: 1,
+    borderColor: darkTheme.border,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    fontSize: 16,
+    backgroundColor: darkTheme.inputBackground,
+    color: darkTheme.inputText,
+  },
+  button: {
+    backgroundColor: darkTheme.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: darkTheme.text,
+    fontSize: 16,
+  },
+  switchText: {
+    color: darkTheme.primary,
+    marginTop: 10,
+  },
+})
