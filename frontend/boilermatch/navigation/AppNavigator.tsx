@@ -1,14 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import MainTabNavigator from './MainTabNavigator';
 
-const AppNavigator = () => {
+export default function AppNavigator() {
   return (
-    <View>
-      <Text>AppNavigator</Text>
-    </View>
-  )
+    <NavigationContainer>
+      <MainTabNavigator />
+    </NavigationContainer>
+  );
 }
-
-export default AppNavigator
-
-const styles = StyleSheet.create({})
