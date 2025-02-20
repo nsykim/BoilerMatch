@@ -11,10 +11,10 @@ class RoommateRecommender:
     def _extract_feature_vector(self, user: Dict) -> List[float]:
         preferences = user.get("preferences", {})
         return [
-            float(preferences.get("Age", 0)),  # Make sure we're getting floats
+            float(preferences.get("Age", 0)),
             float(preferences.get("Alcohol", 0)),
             float(preferences.get("Cleanliness", 0)),
-            float(preferences.get("Gender", 0)),
+            float(preferences.get("Sex", 0)),
             float(preferences.get("Noise", 0)),
             float(preferences.get("Pets", 0)),
             float(preferences.get("Politics", 0)),
@@ -24,28 +24,52 @@ class RoommateRecommender:
         ]
     
     def _filter_by_preferences(self, target_user: Dict, potential_matches: List[Dict]) -> List[Dict]:
-        target_prefs = target_user.get("preferences", {})
-        
-        # Get deal-breaker preferences
-        required_prefs = {
-            "smoking_preference": target_prefs.get("smoking_required"),
-            "pets_preference": target_prefs.get("pets_required"),
-            "gender_preference": target_prefs.get("gender_required"),
-            # Add other deal-breaker preferences here
+        target_info = {
+            "sex": target_user.get("sex"),
+            "smoking": target_user.get("smoking"),
+            "pets": target_user.get("pets")
         }
-        
+
+        target_dealbreakers = target_user.get("dealbreakers", {})
+
+        target_dealbreaker_prefs = {
+            "gender_dealbreaker": target_dealbreakers.get("gender", 0),
+            "smoking_dealbreaker": target_dealbreakers.get("smoking", 0),
+            "pets_dealbreaker": target_dealbreakers.get("pets", 0),
+        }
+
         filtered_matches = []
         for user in potential_matches:
-            user_prefs = user.get("preferences", {})
-            matches_required = all(
-                user_prefs.get(key) == value 
-                for key, value in required_prefs.items() 
-                if value is not None
-            )
+            user_info = {
+                "sex": user.get("sex"),
+                "smoking": user.get("smoking"),
+                "pets": user.get("pets")
+            }
+
+            user_dealbreakers = user.get("dealbreakers", {})
+
+            user_dealbreaker_prefs = {
+                "gender_dealbreaker": user_dealbreakers.get("gender", 0),
+                "smoking_dealbreaker": user_dealbreakers.get("smoking", 0),
+                "pets_dealbreaker": user_dealbreakers.get("pets", 0),
+            }
             
-            if matches_required:
+            # Target user's dealbreakers applied to potential match
+            target_gender_match = not (target_dealbreaker_prefs["gender_dealbreaker"] and target_info["sex"] != user_info["sex"])
+            target_smoking_match = not (target_dealbreaker_prefs["smoking_dealbreaker"] and user_info["smoking"])
+            target_pets_match = not (target_dealbreaker_prefs["pets_dealbreaker"] and user_info["pets"])
+
+            # Potential match's dealbreakers applied to target user
+            user_gender_match = not (user_dealbreaker_prefs["gender_dealbreaker"] and target_info["sex"] != user_info["sex"])
+            user_smoking_match = not (user_dealbreaker_prefs["smoking_dealbreaker"] and target_info["smoking"])
+            user_pets_match = not (user_dealbreaker_prefs["pets_dealbreaker"] and target_info["pets"])
+
+            if (
+                target_gender_match and target_smoking_match and target_pets_match and
+                user_gender_match and user_smoking_match and user_pets_match
+            ):
                 filtered_matches.append(user)
-                
+
         return filtered_matches
     
     def _calculate_similarity_score(self, distance: float) -> float:
