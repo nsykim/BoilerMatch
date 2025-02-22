@@ -15,7 +15,6 @@ const AuthScreen = () => {
   const [school, setSchool] = useState('')
   const [loading, setLoading] = useState(false)
   const { setToken } = useAuth()
-  const [sesh, setSesh] = useState()
 
   const handleRegister = async () => {
     if (!emailRegex.test(email)) {
@@ -54,11 +53,12 @@ const AuthScreen = () => {
     try {
       const { session_token: token } = await apiPost('/login', { email, password });
 
+      setEmail(email);
       setToken(token);
+      await AsyncStorage.setItem("email", email)
       await AsyncStorage.setItem("session_token", token)
       // route them to swipe screen
       
-      setSesh(token)
       Alert.alert('Success', 'Logged in!');
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Something went wrong');
@@ -106,9 +106,6 @@ const AuthScreen = () => {
 
           <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
             <Text style={styles.switchText}>{isLogin ? "Don't have an account? Register" : "Already have an account? Login"}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>{sesh}</Text>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
