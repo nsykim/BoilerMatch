@@ -1,8 +1,11 @@
 import { Alert } from 'react-native';
-import { API_BASE_URL } from '@/config/config';
+import { getApiBaseUrl } from '@/config/config';
 
 const apiGet = async (endpoint: string) => {
   try {
+    const API_BASE_URL = await getApiBaseUrl(); // Fetch the correct API URL dynamically
+    console.log(`GET Request to: ${API_BASE_URL}${endpoint}`);
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
@@ -15,8 +18,7 @@ const apiGet = async (endpoint: string) => {
       throw new Error(errorText || 'Error with GET request');
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error: any) {
     console.error('API GET Error:', error);
     Alert.alert('Error', error.message || 'Something went wrong');
@@ -26,7 +28,9 @@ const apiGet = async (endpoint: string) => {
 
 const apiPost = async (endpoint: string, body: object) => {
   try {
-    console.log(`${API_BASE_URL}${endpoint}`)
+    const API_BASE_URL = await getApiBaseUrl(); // Fetch the correct API URL dynamically
+    console.log(`POST Request to: ${API_BASE_URL}${endpoint}`);
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: {
@@ -35,14 +39,14 @@ const apiPost = async (endpoint: string, body: object) => {
       },
       body: JSON.stringify(body),
     });
-    console.log(response)
+
+    console.log(response);
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Error with POST request');
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error: any) {
     console.error('API POST Error:', error);
     Alert.alert('Error', error.message || 'Something went wrong');
