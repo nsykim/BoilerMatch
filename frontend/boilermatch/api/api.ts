@@ -1,11 +1,8 @@
 import { Alert } from 'react-native';
-import { getApiBaseUrl } from '@/config/config';
+import { API_BASE_URL } from '@/config/config';
 
 const apiGet = async (endpoint: string) => {
   try {
-    const API_BASE_URL = await getApiBaseUrl(); // Fetch the correct API URL dynamically
-    console.log(`GET Request to: ${API_BASE_URL}${endpoint}`);
-
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
@@ -18,7 +15,8 @@ const apiGet = async (endpoint: string) => {
       throw new Error(errorText || 'Error with GET request');
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error: any) {
     console.error('API GET Error:', error);
     Alert.alert('Error', error.message || 'Something went wrong');
@@ -26,27 +24,33 @@ const apiGet = async (endpoint: string) => {
   }
 };
 
-const apiPost = async (endpoint: string, body: object) => {
+const apiPost = async (endpoint: string, body: object, token?: string) => {
   try {
-    const API_BASE_URL = await getApiBaseUrl(); // Fetch the correct API URL dynamically
-    console.log(`POST Request to: ${API_BASE_URL}${endpoint}`);
+    console.log(`${API_BASE_URL}${endpoint}`);
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers,
       body: JSON.stringify(body),
     });
-
+    
     console.log(response);
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Error with POST request');
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error: any) {
     console.error('API POST Error:', error);
     Alert.alert('Error', error.message || 'Something went wrong');

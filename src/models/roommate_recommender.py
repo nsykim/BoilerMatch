@@ -28,9 +28,9 @@ class RoommateRecommender:
         
         # Get deal-breaker preferences
         required_prefs = {
-            "smoking_preference": target_prefs.get("smoking_required"),
-            "pets_preference": target_prefs.get("pets_required"),
-            "gender_preference": target_prefs.get("gender_required"),
+            "smoking_preference": target_prefs.get("smoking_dealbreaker"),
+            "pets_preference": target_prefs.get("pets_dealbreaker"),
+            "gender_preference": target_prefs.get("gender_dealbreaker"),
             # Add other deal-breaker preferences here
         }
         
