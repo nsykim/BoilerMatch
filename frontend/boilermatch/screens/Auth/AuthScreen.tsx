@@ -5,6 +5,13 @@ import { apiPost } from '@/api/api'
 import { useAuth } from '@/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+//navigation things
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/types';  // Define this if you haven't already
+
+
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_+-])[A-Za-z\d!@#$%^&*(),.?":{}|<>_+-]{8,64}$/
 
@@ -15,6 +22,10 @@ const AuthScreen = () => {
   const [school, setSchool] = useState('')
   const [loading, setLoading] = useState(false)
   const { setToken } = useAuth()
+
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+
 
   const handleRegister = async () => {
     if (!emailRegex.test(email)) {
@@ -57,9 +68,13 @@ const AuthScreen = () => {
       setToken(token);
       await AsyncStorage.setItem("email", email)
       await AsyncStorage.setItem("session_token", token)
-      // route them to swipe screen
+
+      //ROUTE TO PREFERENCES
+      Alert.alert("Success", "Logged in!", [
+        { text: "OK", onPress: () => navigation.navigate("Preferences") }
+      ]);
       
-      Alert.alert('Success', 'Logged in!');
+          
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Something went wrong');
     } finally {
