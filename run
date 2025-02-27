@@ -75,10 +75,10 @@ run_api_tests() {
 
     if ! newman run tests/BoilerMatch.postman_collection.json \
         --environment tests/BoilerMatch.postman_environment.json \
-        --reporters cli,junit --reporter-junit-export newman-report.xml; then
+        --reporters cli,junit --reporter-junit-export newman-report.xml \
+        --bail --suppress-exit-code 1; then
 
         echo "Error running API tests"
-
         return 1
     fi
     echo "All tests passed successfully."
@@ -113,6 +113,7 @@ all_tests() {
     if ! newman run tests/BoilerMatch.postman_collection.json \
         --environment tests/BoilerMatch.postman_environment.json \
         --reporters cli,junit --reporter-junit-export newman-report.xml \
+        --bail --suppress-exit-code 1 \
         >> "$LOG_FILE" 2>> "$ERROR_LOG_FILE"; then
         echo "Error running API tests"
         return 1
