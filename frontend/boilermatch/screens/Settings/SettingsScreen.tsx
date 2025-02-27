@@ -11,10 +11,11 @@ const SettingsScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("session_token"); // Remove token from storage
-    setToken(null); // Reset authentication state
-    navigation.reset({ index: 0, routes: [{ name: "Auth" }] }); // Navigate back to login
+    await AsyncStorage.removeItem("session_token");
+    setToken(null);
   };
+  
+  
 
   return (
     <View style={styles.container}>

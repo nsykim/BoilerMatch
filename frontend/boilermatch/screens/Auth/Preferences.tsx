@@ -4,6 +4,7 @@ import { darkTheme } from '@/styles/theme';
 import { apiPost } from '@/api/api';
 import { useAuth } from '@/contexts/AuthContext';
 
+
 type Category = 'Age' | 'Alcohol' | 'Cleanliness' | 'Gender' | 'Noise' | 'Pets' | 
                 'Politics' | 'Sleep Schedule' | 'Smoking' | 'Social';
 
