@@ -37,13 +37,6 @@ jobs:
           source venv/bin/activate
           chmod +x run  # Ensure script is executable
           ./run install  # Install dependencies
-
-      - name: Set up Firebase credentials
-        run: |
-          # Create a credential file from the base64 secret
-          echo '${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}' | base64 -d > firebase-credentials.json
-          # Set an environment variable pointing to this file
-          echo "FIREBASE_CREDENTIALS_FILE=$(pwd)/firebase-credentials.json" >> $GITHUB_ENV
         
       - name: Run Tests
         run: |

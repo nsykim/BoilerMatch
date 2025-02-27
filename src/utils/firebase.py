@@ -12,19 +12,12 @@ from src.database.db_operations import update_chat
 load_dotenv()
 
 if not firebase_admin._apps: # only perform this if firebase has not been initialized
-    firebase_credentials_file = os.getenv("FIREBASE_CREDENTIALS_FILE")
-    
-    if firebase_credentials_file and os.path.exists(firebase_credentials_file):
-        # Load directly from file (avoids JSON parsing issues)
-        with open(firebase_credentials_file, 'r') as f:
-            firebase_credentials = json.load(f)
-    else:
-        firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
-        if firebase_credentials is None: 
-            logging.critical("FIREBASE_CREDENTIALS not set in .env file")
-            raise ValueError("FIREBASE_CREDENTIALS not set in .env file")
+    firebase_credentials = os.getenv("FIREBASE_CREDENTIALS")
+    if firebase_credentials is None: 
+        logging.critical("FIREBASE_CREDENTIALS not set in .env file")
+        raise ValueError("FIREBASE_CREDENTIALS not set in .env file")
 
-        firebase_credentials = json.loads(firebase_credentials)
+    firebase_credentials = json.loads(firebase_credentials)
 
     cred = credentials.Certificate(firebase_credentials)
     firebase_admin.initialize_app(cred)
