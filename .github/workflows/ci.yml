@@ -13,7 +13,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    
     env:
       FIREBASE_CREDENTIALS_B64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
