@@ -13,11 +13,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
+    
     env:
-      FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }},
+      FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       USER_NAME: ${{ secrets.USER_NAME }}
       PW: ${{ secrets.PW }} 
+      run: |
+          echo "FIREBASE_CREDENTIALS=$(echo $FIREBASE_CREDENTIALS | base64 -d)" >> $GITHUB_ENV
 
     steps:
       - name: Checkout Repository
