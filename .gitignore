@@ -3,6 +3,7 @@ __pycache__
 
 # .env
 .env
+src/utils/firebase_creds.json
 
 # .vscode
 .vscode

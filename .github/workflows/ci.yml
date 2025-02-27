@@ -19,8 +19,6 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       USER_NAME: ${{ secrets.USER_NAME }}
       PW: ${{ secrets.PW }} 
-      run: |
-          echo "FIREBASE_CREDENTIALS=$(echo $FIREBASE_CREDENTIALS | base64 -d)" >> $GITHUB_ENV
 
     steps:
       - name: Checkout Repository
@@ -37,6 +35,11 @@ jobs:
           source venv/bin/activate
           chmod +x run  # Ensure script is executable
           ./run install  # Install dependencies
+
+      - name: Decode and write Firebase credentials
+        run: echo "$FIREBASE_CREDENTIALS_BASE64" | base64 --decode > src/utils/firebase_creds.json
+        env:
+          FIREBASE_CREDENTIALS_BASE64: ${{ secrets.FIREBASE_CREDENTIALS_BASE64 }} 
         
       - name: Run Tests
         run: |
