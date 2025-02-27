@@ -31,7 +31,6 @@ empty_preferences = {
     "gender_dealbreaker": -1,
 }
 
-
 def connect_to_mongodb(database):
     try:
         logging.info("Connecting to MongoDB")
