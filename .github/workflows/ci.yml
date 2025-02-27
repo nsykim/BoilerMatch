@@ -38,7 +38,7 @@ jobs:
 
       - name: Decode and write Firebase credentials
         run: |
-          echo "$FIREBASE_CREDENTIALS_BASE64" | base64 --decode > src/utils/firebase_creds.json
+          echo "$FIREBASE_CREDENTIALS_B64" | base64 --decode > src/utils/firebase_creds.json
           echo "Firebase secret length: ${#FIREBASE_CREDENTIALS_B64}"
         env:
           FIREBASE_CREDENTIALS_BASE64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }} 
