@@ -21,7 +21,6 @@ def generate_jwt(email: str, expires_in: int = 3600) -> str:
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-# Validates a JWT and returns the decoded payload if valid.
 def validate_jwt(token: str) -> Optional[Dict]:
     try:
         decoded_payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
