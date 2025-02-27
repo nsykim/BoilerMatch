@@ -16,17 +16,19 @@ load_dotenv()
 # 5 = Deal breaker
 
 empty_preferences = {
-    "Cleanliness": -1,
-    "Noise": -1,
-    "Social": -1,
-    "Sleep Schedule": -1,
-    "Smoking": -1,
-    "Pets": -1,
-    "Alcohol": -1,
-    "Gender": -1,
-    "Age": -1,
-    "Politics": -1,
-
+    "age": -1,
+    "alcohol": -1,
+    "cleanliness": -1,
+    "gender": "",
+    "noise": -1,
+    "hasPets": "",
+    "politics": -1,
+    "sleepSchedule": -1,
+    "doesSmoke": "",
+    "social": -1,
+    "smoking_dealbreaker": -1,
+    "pets_dealbreaker": -1,
+    "gender_dealbreaker": -1,
 }
 
 def connect_to_mongodb(database):
@@ -128,4 +130,13 @@ def update_preferences(user, preferences, collection, email):
         return True
     except PyMongoError as error:
         logging.error('Error updating preferences: %s', error)
+        return False
+    
+def update_user_info(user, user_info, collection, email):
+    try:
+        collection.update_one({"email": email}, {"$set": {"userInfo": user_info}})
+        user["userInfo"] = user_info
+        return True
+    except Exception as error:
+        logging.error("Error updating user info: %s", error)
         return False

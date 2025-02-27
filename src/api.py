@@ -184,6 +184,42 @@ def set_preferences():
         logging.error("set_preferences: preferences could not be updated")
         return session_token, 500
 
+@app.route('/set_user_info', methods=['POST'])
+def set_user_info():
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers.get('Authorization')
+    user_info = body.get('user_info')
+    
+    if not email or not session_token or not user_info:
+        logging.info("set_user_info: malformed request... missing email, session token, or user_info")
+        return session_token, 400
+    logging.info("set_user_info: all required fields were set")
+    
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("set_user_info: invalid session token")
+        return session_token, 401
+    logging.info("set_user_info: valid session token")
+    
+    success, accounts_db = connect_to_mongodb("accounts")
+    if not success:
+        logging.error("set_user_info: failed to connect to database")
+        return session_token, 500
+    
+    table = accounts_db["accounts"]
+    success, user = get_user_by_email(email, table)
+    if not success or user is None:
+        logging.info("set_user_info: error fetching user")
+        return session_token, 500
+    
+    logging.info("User found: %s", user)
+    success = update_user_info(user, user_info, table, email)
+    if success:
+        logging.info("set_user_info: user info successfully updated")
+        return session_token, 200
+    else:
+        logging.error("set_user_info: user info could not be updated")
+        return session_token, 500
 
 accounts_db = None
 chats_db = None

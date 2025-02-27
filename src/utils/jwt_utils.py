@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = "HS256"
 
 # Generates a JWT given user data
-def generate_jwt(email: str, expires_in: int = 3600) -> str:
+def generate_jwt(email: str, expires_in: int = 86400) -> str:
     now = datetime.datetime.now(datetime.timezone.utc)
     payload = {
         "email": email,
