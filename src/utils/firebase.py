@@ -17,7 +17,6 @@ if not firebase_admin._apps: # only perform this if firebase has not been initia
         logging.critical("FIREBASE_CREDENTIALS not set in .env file")
         raise ValueError("FIREBASE_CREDENTIALS not set in .env file")
     # revert credentials back into json
-    firebase_credentials = firebase_credentials.replace("\\n", "\n")
 
     firebase_credentials = json.loads(firebase_credentials)
 
