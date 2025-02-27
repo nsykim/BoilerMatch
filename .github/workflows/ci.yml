@@ -37,7 +37,7 @@ jobs:
 
       - name: Debug Stuff
         run: | 
-          echo Firebase Credentials Length: ${#FIREBASE_CREDENTIALS}
+          echo "$FIREBASE_CREDENTIALS" | head -c 200
 
       - name: Run Tests
         run: |
