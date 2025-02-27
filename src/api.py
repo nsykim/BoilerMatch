@@ -184,7 +184,6 @@ def send_message():
         logging.error("send_message: message could not be sent")
         return '', 500
     
-
 @app.route('/open_chat', methods=['POST'])
 def open_chat():
     body = request.json
