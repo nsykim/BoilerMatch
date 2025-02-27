@@ -7,7 +7,7 @@ import Preferences from './screens/Auth/Preferences';
 const App = () => {
   return (
     <AuthProvider>
-      <UserInfo />
+      <AppNavigator />
     </AuthProvider>
   );
 };
