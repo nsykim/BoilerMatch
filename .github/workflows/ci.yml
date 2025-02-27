@@ -15,7 +15,7 @@ jobs:
     
     
     env:
-      FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS_B64 }}
+      FIREBASE_CREDENTIAL_B64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       USER_NAME: ${{ secrets.USER_NAME }}
       PW: ${{ secrets.PW }} 
