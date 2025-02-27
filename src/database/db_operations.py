@@ -92,14 +92,14 @@ def update_preferences(user, preferences, collection, email):
         logging.error('Error updating preferences: %s', error)
         return False
 
-def update_chat(chat_id, collection, timetamp):
+def update_chat(chat_id, collection, timestamp):
     try:
-        collection.update_many(
-            {"chats.chat_id": chat_id}, 
-            { "$set": {
-                "chats.$.lastUpdated": timetamp 
-            }
-        })
+        result = collection.update_many(
+            {"chats.chat_id": chat_id},
+            {"$set": {"chats.$[elem].lastUpdated": timestamp}},
+            array_filters=[{"elem.chat_id": chat_id}]
+        )
+        logging.info(f"Updated {result.modified_count} chat(s) with chat_id {chat_id}")
         return True
     except PyMongoError as error:
         logging.error('Error updating chat: %s', error)

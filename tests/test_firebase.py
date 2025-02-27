@@ -65,7 +65,7 @@ class TestFirebaseMessaging(unittest.TestCase):
         self.mock_update_chat.return_value = True
         
         # Execute
-        result = self.firebase_messaging.send_message(chat_id, sender, content, collection)
+        result = self.firebase_messaging.fb_send_message(chat_id, sender, content, collection)
         
         # Assert
         self.mock_db.collection.assert_called_with("chats")
@@ -100,7 +100,7 @@ class TestFirebaseMessaging(unittest.TestCase):
         self.mock_message_doc.set.side_effect = Exception("Firebase error")
         
         # Execute
-        result = self.firebase_messaging.send_message(chat_id, sender, content, collection)
+        result = self.firebase_messaging.fb_send_message(chat_id, sender, content, collection)
         
         # Assert
         self.assertFalse(result)
@@ -115,7 +115,7 @@ class TestFirebaseMessaging(unittest.TestCase):
         self.mock_update_chat.return_value = False
         
         # Execute
-        result = self.firebase_messaging.send_message(chat_id, sender, content, collection)
+        result = self.firebase_messaging.fb_send_message(chat_id, sender, content, collection)
         
         # Assert
         self.assertFalse(result)
@@ -159,7 +159,7 @@ class TestFirebaseMessaging(unittest.TestCase):
         collection = "test_collection"
         self.mock_update_chat.side_effect = Exception("MongoDB connection error")
         
-        result = self.firebase_messaging.send_message(chat_id, sender, content, collection)
+        result = self.firebase_messaging.fb_send_message(chat_id, sender, content, collection)
         
         self.assertFalse(result)
         self.mock_update_chat.assert_called_once()
@@ -173,7 +173,7 @@ class TestFirebaseMessaging(unittest.TestCase):
         self.mock_update_chat.return_value = True
         
         current_time = int(time.time())
-        result = self.firebase_messaging.send_message(chat_id, sender, content, collection)
+        result = self.firebase_messaging.fb_send_message(chat_id, sender, content, collection)
         
         self.assertTrue(result)
         call_args = self.mock_message_doc.set.call_args[0][0]

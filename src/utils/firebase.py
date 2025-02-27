@@ -26,7 +26,7 @@ if not firebase_admin._apps: # only perform this if firebase has not been initia
 db = firestore.client()
 
 
-def send_message(chat_id, sender, content, collection):
+def fb_send_message(chat_id, sender, content, collection):
     timestamp = int(time.time())
     logging.info("Sending message at timestamp: %s", timestamp)
     try:
@@ -41,6 +41,7 @@ def send_message(chat_id, sender, content, collection):
         logging.error("Error sending message to firebase: %s", e)
         return False
     try:
+        logging.info("ALLUAHACKBAR %s", chat_id)
         success = update_chat(chat_id, collection, timestamp)   
         if success == False:
             logging.error("Error updating chat in mongo database")
@@ -61,3 +62,20 @@ def fetch_chat_history(chat_id):
     except Exception as e:
         logging.error("Error fetching chat history: %s", e)
         return None
+
+def delete_chat(chat_id):
+    try:
+        doc_ref = db.collection("chats").document(chat_id)
+        doc = doc_ref.get()
+
+        message_ref = doc_ref.collection("messages")
+        messages = message_ref.stream()
+        for message in messages:
+            message.reference.delete()
+        
+        doc_ref.delete()
+        logging.info("Chat deleted successfully")
+        return True
+    except Exception as e:
+        logging.error("Error deleting chat: %s", e)
+        return False

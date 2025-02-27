@@ -155,12 +155,13 @@ def get_user_info():
         return session_token, 500
     
     logging.info("user: %s", user)
+    user["_id"] = str(user["_id"])
     return jsonify(user), 200
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
     body = request.json
-    chat_id = body.get('chat_id') # frontend needs to get chat_id based on who they are texting
+    chat_id = request.headers['chat_id']
     content = body.get('content')
     session_token = request.headers['Authorization']
     email = body.get('email')
@@ -176,7 +177,7 @@ def send_message():
     logging.info("send_message: valid session token")
 
     table = accounts_db["accounts"]
-    if send_message(chat_id, email, content, table):
+    if fb_send_message(chat_id, email, content, table):
         logging.info("send_message: message sent successfully")
         return '', 200
     else:
@@ -187,7 +188,7 @@ def send_message():
 @app.route('/open_chat', methods=['POST'])
 def open_chat():
     body = request.json
-    chat_id = body.get('chat_id')
+    chat_id = request.headers['chat_id']
     session_token = request.headers['Authorization']
     email = body.get('email')
 
@@ -274,8 +275,16 @@ def like():
         return '', 200
     elif success == True:
         logging.info("match: users matched")
-        return '', 200
+        return jsonify({"chat_id" : id}), 200
 
+@app.route('/delete_chatlog', methods=['DELETE'])
+def delete_chatlog():
+    chat_id = request.headers['chat_id']
+    
+    if delete_chat(chat_id):
+        return '', 200
+    else:
+        return '', 500
 
 
 accounts_db = None

@@ -318,7 +318,8 @@ class TestDatabaseOperations(unittest.TestCase):
         self.assertTrue(success)
         self.mock_collection.update_many.assert_called_once_with(
             {"chats.chat_id": chat_id},
-            {"$set": {"chats.$.lastUpdated": timestamp}}
+            {"$set": {"chats.$[elem].lastUpdated": timestamp}},
+            array_filters=[{"elem.chat_id": chat_id}]
         )
 
     def test_update_chat_failure(self):
