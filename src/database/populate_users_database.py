@@ -12,23 +12,26 @@ def generate_random_email():
 def generate_random_preferences():
     """Generate random preferences for a user"""
     return {
-        "Cleanliness": random.randint(0, 5),
-        "Noise": random.randint(0, 5),
-        "Social": random.randint(0, 5),
-        "Sleep Schedule": random.randint(0, 5),
-        "Smoking": random.randint(0, 5),
-        "Pets": random.randint(0, 5),
-        "Alcohol": random.randint(0, 5),
-        "Gender": random.randint(0, 5),
-        "Age": random.randint(0, 5),
-        "Politics": random.randint(0, 5)
+        "cleanliness": random.randint(0, 5),
+        "noise": random.randint(0, 5),
+        "social": random.randint(0, 5),
+        "sleep_schedule": random.randint(0, 5),
+        "alcohol": random.randint(0, 5),
+        "age": random.randint(0, 5),
+        "politics": random.randint(0, 5),
+        "doesSmoke": random.choice([True, False]),
+        "hasPets": random.choice([True, False]),
+        "gender": random.choice(["M", "F"]),
+        "smoking_dealbreaker": random.choice([True, False]),
+        "pets_dealbreaker": random.choice([True, False]),
+        "gender_dealbreaker": random.choice([True, False])
     }
 
 def populate_database():
     base_url = "http://127.0.0.1:3020"
     created_users = []
 
-    for i in range(200):
+    for i in range(99):
         # Generate random user data
         email = generate_random_email()
         password = "testpassword123"  # Using same password for all test users
@@ -48,7 +51,7 @@ def populate_database():
             continue
             
         # Login to get session token
-        login_response = requests.get(
+        login_response = requests.post(
             f"{base_url}/login",
             json={
                 "email": email,

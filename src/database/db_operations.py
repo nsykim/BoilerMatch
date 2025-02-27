@@ -129,3 +129,12 @@ def update_preferences(user, preferences, collection, email):
     except PyMongoError as error:
         logging.error('Error updating preferences: %s', error)
         return False
+    
+def update_user_info(user, user_info, collection, email):
+    try:
+        collection.update_one({"email": email}, {"$set": {"userInfo": user_info}})
+        user["userInfo"] = user_info
+        return True
+    except Exception as error:
+        logging.error("Error updating user info: %s", error)
+        return False

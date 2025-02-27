@@ -10,14 +10,14 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true)
-  const [email, setEmail] = useState('')
+  const [inputEmail, setInputEmail] = useState('')
   const [password, setPassword] = useState('')
   const [school, setSchool] = useState('')
   const [loading, setLoading] = useState(false)
-  const { setToken } = useAuth()
+  const { setEmail, setToken } = useAuth()
 
   const handleRegister = async () => {
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(inputEmail)) {
       Alert.alert('Invalid Email', 'Please enter a valid email address.');
       return;
     }
@@ -32,7 +32,7 @@ const AuthScreen = () => {
 
     setLoading(true);
     try {
-      await apiPost('/create_account', { email, password, school });
+      await apiPost('/create_account', { email: inputEmail, password, school });
 
       Alert.alert('Success', 'Account created! You can now log in.');
       setIsLogin(true); // Switch to login mode after registration
@@ -44,18 +44,18 @@ const AuthScreen = () => {
   };
 
   const handleLogin = async () => {
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(inputEmail)) {
       Alert.alert('Invalid Email', 'Please enter a valid email address.');
       return;
     }
 
     setLoading(true);
     try {
-      const { session_token: token } = await apiPost('/login', { email, password });
+      const { session_token: token } = await apiPost('/login', { email: inputEmail, password });
 
-      setEmail(email);
+      setEmail(inputEmail);
       setToken(token);
-      await AsyncStorage.setItem("email", email)
+      await AsyncStorage.setItem("email", inputEmail)
       await AsyncStorage.setItem("session_token", token)
       // route them to swipe screen
       
@@ -77,8 +77,8 @@ const AuthScreen = () => {
             style={styles.input}
             placeholder="Email"
             placeholderTextColor={darkTheme.text}
-            value={email}
-            onChangeText={setEmail}
+            value={inputEmail}
+            onChangeText={setInputEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
