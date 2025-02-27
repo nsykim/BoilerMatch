@@ -25,7 +25,6 @@ if not firebase_admin._apps: # only perform this if firebase has not been initia
 
 db = firestore.client()
 
-
 def fb_send_message(chat_id, sender, content, collection):
     timestamp = int(time.time())
     logging.info("Sending message at timestamp: %s", timestamp)
