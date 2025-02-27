@@ -40,12 +40,10 @@ jobs:
 
       - name: Set up Firebase credentials
         run: |
-          # Temporarily store the decoded JSON
-          export TEMP_JSON=$(echo '${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}' | base64 -d)
-          # Use the multiline syntax to preserve all formatting exactly
-          echo 'FIREBASE_CREDENTIALS<<EOF' >> $GITHUB_ENV
-          echo "$TEMP_JSON" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          # Create a credential file from the base64 secret
+          echo '${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}' | base64 -d > firebase-credentials.json
+          # Set an environment variable pointing to this file
+          echo "FIREBASE_CREDENTIALS_FILE=$(pwd)/firebase-credentials.json" >> $GITHUB_ENV
         
       - name: Run Tests
         run: |
