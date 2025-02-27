@@ -14,8 +14,7 @@ load_dotenv()
 if not firebase_admin._apps: # only perform this if firebase has not been initialized
     with open("src/utils/firebase_creds.json") as f:
         firebase_config = json.load(f)
-
-# Initialize Firebase using the credentials
+        
     cred = credentials.Certificate(firebase_config)
     firebase_admin.initialize_app(cred)
 
