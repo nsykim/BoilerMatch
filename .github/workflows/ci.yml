@@ -34,7 +34,11 @@ jobs:
           source venv/bin/activate
           chmod +x run  # Ensure script is executable
           ./run install  # Install dependencies
-
+        
+      - name: Set Up Firebase Credentials
+        run: |
+          echo $FIREBASE_CREDENTIALS > firebase-credentials.json
+        
       - name: Run Tests
         run: |
           source venv/bin/activate
