@@ -14,18 +14,20 @@ export default function AppNavigator() {
     const checkLoginStatus = async () => {
       try {
         const storedToken = await AsyncStorage.getItem("session_token");
-        console.log("Retrieved Token from AsyncStorage:", storedToken);
-
+        console.log("Stored Token in AsyncStorage:", storedToken);
+  
         if (storedToken) {
           setToken(storedToken);
+        } else {
+          setToken(null); // Explicitly set null if token is missing
         }
       } catch (error) {
         console.error("Error retrieving session token:", error);
       } finally {
-        setLoading(false);  // Ensure UI updates properly
+        setLoading(false);
       }
     };
-
+  
     checkLoginStatus();
   }, []);
 
