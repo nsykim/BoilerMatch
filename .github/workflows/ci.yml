@@ -40,8 +40,7 @@ jobs:
         run: |
           echo "$FIREBASE_CREDENTIALS_B64" | base64 --decode > src/utils/firebase_creds.json
           echo "Firebase secret length: ${#FIREBASE_CREDENTIALS_B64}"
-        env:
-          FIREBASE_CREDENTIALS_BASE64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }} 
+          echo "firebase_creds.json: $(cat src/utils/firebase_creds.json)"
         
       - name: Run Tests
         run: |
