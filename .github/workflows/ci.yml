@@ -37,6 +37,15 @@ jobs:
           source venv/bin/activate
           chmod +x run  # Ensure script is executable
           ./run install  # Install dependencies
+
+      - name: Set up Firebase credentials
+        run: |
+          # Temporarily store the decoded JSON
+          export TEMP_JSON=$(echo '${{ secrets.FIREBASE_CREDENTIALS_BASE64 }}' | base64 -d)
+          # Use the multiline syntax to preserve all formatting exactly
+          echo 'FIREBASE_CREDENTIALS<<EOF' >> $GITHUB_ENV
+          echo "$TEMP_JSON" >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
         
       - name: Run Tests
         run: |
