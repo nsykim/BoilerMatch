@@ -32,7 +32,7 @@ const AuthScreen = () => {
       Alert.alert('Invalid Email', 'Please enter a valid email address.');
       return;
     }
-
+  
     if (!passwordRegex.test(password)) {
       Alert.alert(
         'Weak Password',
@@ -40,13 +40,21 @@ const AuthScreen = () => {
       );
       return;
     }
-
+  
     setLoading(true);
     try {
       await apiPost('/create_account', { email: inputEmail, password, school });
-
-      Alert.alert('Success', 'Account created! You can now log in.');
-      setIsLogin(true); // Switch to login mode after registration
+  
+      // Automatically log in after successful registration
+      const { session_token: token } = await apiPost('/login', { email: inputEmail, password });
+  
+      setEmail(inputEmail);
+      setToken(token);
+      await AsyncStorage.setItem("email", inputEmail);
+      await AsyncStorage.setItem("session_token", token);
+  
+      // Navigate to UserInfo first, then Preferences
+      navigation.navigate("UserInfo", { fromRegister: true });
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Something went wrong');
     } finally {

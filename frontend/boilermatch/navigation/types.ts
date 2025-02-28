@@ -4,4 +4,5 @@ export type RootStackParamList = {
   MainTabNavigator: undefined;
   Chat: undefined;
   Settings: undefined;
+  UserInfo: { fromRegister?: boolean };
 };

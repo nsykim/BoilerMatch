@@ -4,6 +4,11 @@ import { darkTheme } from '@/styles/theme';
 import { apiPost } from '@/api/api';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/types';
+
+
 type Category = 'age' | 'alcohol' | 'cleanliness' | 'gender' | 'noise' | 'hasPets' | 
                 'politics' | 'sleepSchedule' | 'doesSmoke' | 'social';
 
@@ -23,6 +28,9 @@ const categories: Category[] = [
 const dealbreakableCategories: Category[] = ['doesSmoke', 'hasPets', 'gender'];
 
 const Preferences = () => {
+
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const [preferences, setPreferences] = useState<Record<Category, any>>({
     age: -1,
     alcohol: -1,
@@ -52,10 +60,17 @@ const Preferences = () => {
   };
 
   const handleSubmit = async () => {
-    if (Object.values(preferences).includes(-1) || preferences.gender === '' || preferences.hasPets === null || preferences.doesSmoke === null) {
-      Alert.alert('Error', 'Please set all preferences.');
-      console.error('Invalid preference values detected:', preferences);
-      return;
+    const missingPreferences = Object.values(preferences).includes(-1) || 
+                               preferences.gender === '' || 
+                               preferences.hasPets === null || 
+                               preferences.doesSmoke === null;
+  
+    if (missingPreferences) {
+      Alert.alert(
+        'Warning',
+        'Some preferences are missing. You can update them later in settings.'
+      );
+      console.warn('Incomplete preference values detected:', preferences);
     }
   
     const preferencesWithDealbreakers = {
@@ -70,11 +85,17 @@ const Preferences = () => {
         throw new Error("Invalid session token");
       }
       await apiPost('/set_preferences', { email, preferences: preferencesWithDealbreakers }, token);
-      Alert.alert('Success', 'Preferences saved!');
+      console.log("Preferences saved successfully!");
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Something went wrong.');
-    }
+      console.error("API Error:", error);
+    } 
+  
+    // ✅ Always navigate to the MainTabs screen, even if API fails
+    navigation.reset({ index: 0, routes: [{ name: "MainTabNavigator" }] });
+
   };
+  
+  
 
   const capitalizeWord = (word: string): string => {
     return word.charAt(0).toUpperCase() + word.substring(1)

@@ -4,6 +4,11 @@ import { darkTheme } from '@/styles/theme';
 import { apiPost } from '@/api/api';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/types';
+import { RouteProp } from '@react-navigation/native';
+
 const UserInfo = () => {
   const [userInfo, setUserInfo] = useState({
     firstName: '',
@@ -14,6 +19,15 @@ const UserInfo = () => {
   });
   const { email, token } = useAuth();
 
+  // ✅ These lines must be inside the component
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'UserInfo'>>();
+
+
+  // Check if user came from registration
+  const fromRegister = route.params?.fromRegister ?? false;
+
+
   const handleChange = (field: string, value: string) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
   };
@@ -23,18 +37,25 @@ const UserInfo = () => {
       Alert.alert('Error', 'Please fill out all required fields.');
       return;
     }
-
+  
     try {
       if (!token) {
         throw new Error("Invalid session token");
       }
       await apiPost('/set_user_info', { email, user_info: userInfo }, token);
-      Alert.alert('Success', 'User information saved.');
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Something went wrong.');
+      console.error("API Error:", error);  // ✅ Log the error but don’t block navigation
+    } finally {
+      if (fromRegister) {
+        navigation.navigate("Preferences");  // ✅ Navigate even if API fails
+      } else {
+        Alert.alert('Success', 'User information saved.');
+      }
     }
   };
+  
 
+  
   return (
     <View style={styles.container}>
       <Text style={styles.header}>User Information</Text>
