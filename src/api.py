@@ -179,7 +179,7 @@ def set_preferences():
     success = update_preferences(user, preferences, table, email)
     if success == True:
         logging.info("set_preferences: preferences successfully updated")
-        return session_token, 200
+        return jsonify({"message": "Preferences successfully updated"}), 200
     else:
         logging.error("set_preferences: preferences could not be updated")
         return session_token, 500
@@ -216,7 +216,7 @@ def set_user_info():
     success = update_user_info(user, user_info, table, email)
     if success:
         logging.info("set_user_info: user info successfully updated")
-        return session_token, 200
+        return jsonify({"message": "User info successfully updated"}), 200
     else:
         logging.error("set_user_info: user info could not be updated")
         return session_token, 500
