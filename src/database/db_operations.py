@@ -140,3 +140,7 @@ def update_user_info(user, user_info, collection, email):
     except Exception as error:
         logging.error("Error updating user info: %s", error)
         return False
+    
+if __name__ == "__main__":
+    success, accounts_db = connect_to_mongodb("accounts")
+    remove_all_users(accounts_db["accounts"])

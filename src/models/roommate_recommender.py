@@ -18,27 +18,58 @@ class RoommateRecommender:
     
     def _filter_by_preferences(self, target_user: Dict, potential_matches: List[Dict]) -> List[Dict]:
         target_prefs = target_user.get("preferences", {})
-
         filtered_matches = []
+        
+        # Add logging to see what's happening
+        logging.info(f"Target user prefs: {target_prefs}")
+        
         for user in potential_matches:
             user_prefs = user.get("preferences", {})
-
-            # Smoking dealbreaker: If either user has it set and the other smokes, skip
-            if (target_prefs.get("smoking_dealbreaker", 0) == 1 and user_prefs.get("doesSmoke", 0) == 1) or \
-            (user_prefs.get("smoking_dealbreaker", 0) == 1 and target_prefs.get("doesSmoke", 0) == 1):
+            
+            # Log the current user being evaluated
+            logging.debug(f"Evaluating user {user.get('email')}, prefs: {user_prefs}")
+            
+            # Smoking dealbreaker: Only filter if both conditions are true
+            if (target_prefs.get("smoking_dealbreaker", 0) == 1 and user_prefs.get("doesSmoke", 0) == 1):
+                logging.debug(f"User {user.get('email')} filtered: smoking dealbreaker")
+                continue
+                
+            if (user_prefs.get("smoking_dealbreaker", 0) == 1 and target_prefs.get("doesSmoke", 0) == 1):
+                logging.debug(f"User {user.get('email')} filtered: other's smoking dealbreaker")
                 continue
 
-            # Pets dealbreaker: If either user has it set and the other has pets, skip
-            if (target_prefs.get("pets_dealbreaker", 0) == 1 and user_prefs.get("hasPets", 0) == 1) or \
-            (user_prefs.get("pets_dealbreaker", 0) == 1 and target_prefs.get("hasPets", 0) == 1):
+            # Pets dealbreaker: Only filter if both conditions are true
+            if (target_prefs.get("pets_dealbreaker", 0) == 1 and user_prefs.get("hasPets", 0) == 1):
+                logging.debug(f"User {user.get('email')} filtered: pets dealbreaker")
+                continue
+                
+            if (user_prefs.get("pets_dealbreaker", 0) == 1 and target_prefs.get("hasPets", 0) == 1):
+                logging.debug(f"User {user.get('email')} filtered: other's pets dealbreaker")
                 continue
 
-            # Gender dealbreaker: If either user has a gender preference that the other does not match, skip
-            if ((target_prefs.get("gender_dealbreaker", 0) == 1 or user_prefs.get("gender_dealbreaker", 0) == 1) and target_prefs.get("gender") != user.get("gender")):
-                continue
+            # Gender dealbreaker: Check if gender preference exists and is a dealbreaker
+            if target_prefs.get("gender_dealbreaker", 0) == 1:
+                target_gender_pref = target_prefs.get("gender")
+                user_gender = user.get("preferences", {}).get("gender")
+                
+                # Only filter if we have both gender values to compare
+                if target_gender_pref and user_gender and target_gender_pref != user_gender:
+                    logging.debug(f"User {user.get('email')} filtered: gender mismatch (target preference)")
+                    continue
+                    
+            if user_prefs.get("gender_dealbreaker", 0) == 1:
+                user_gender_pref = user_prefs.get("gender")
+                target_gender = target_user.get("preferences", {}).get("gender")
+                
+                # Only filter if we have both gender values to compare
+                if user_gender_pref and target_gender and user_gender_pref != target_gender:
+                    logging.debug(f"User {user.get('email')} filtered: gender mismatch (other's preference)")
+                    continue
 
+            # If passed all filters, add to matches
             filtered_matches.append(user)
 
+        logging.info(f"Filtered matches count: {len(filtered_matches)} out of {len(potential_matches)}")
         return filtered_matches
     
     def _calculate_similarity_score(self, distance: float) -> float:

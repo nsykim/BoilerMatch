@@ -201,11 +201,6 @@ def set_user_info():
         return session_token, 401
     logging.info("set_user_info: valid session token")
     
-    success, accounts_db = connect_to_mongodb("accounts")
-    if not success:
-        logging.error("set_user_info: failed to connect to database")
-        return session_token, 500
-    
     table = accounts_db["accounts"]
     success, user = get_user_by_email(email, table)
     if not success or user is None:

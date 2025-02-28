@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiPost } from '@/api/api';
 import { darkTheme } from '@/styles/theme';
 
 interface User {
-  name: string;
-  age: number;
   school: string;
-  bio: string;
+  userInfo: {
+    first_name: string;
+    last_name: string;
+    age: number;
+    school: string;
+    bio: string;
+  }
 }
 
 const SwipeScreen = () => {
@@ -52,18 +56,23 @@ const SwipeScreen = () => {
   }
 
   const user = users[currentIndex];
-  console.log(user)
   return (
     <View style={styles.container}>
-      <Text style={styles.name}>{user.name}, {user.age}</Text>
-      <Text style={styles.school}>{user.school}</Text>
-      <Text style={styles.bio}>{user.bio}</Text>
-      <TouchableOpacity style={styles.button} onPress={handleSwipe}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
+      <View style={styles.cardContainer}>
+        <Text style={styles.name}>{user.userInfo.first_name} {user.userInfo.last_name}, {user.userInfo.age}</Text>
+        <Text style={styles.school}>{user.school}</Text>
+        <View style={styles.bioContainer}>
+          <Text style={styles.bio}>{user.userInfo.bio}</Text>
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleSwipe}>
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -71,6 +80,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: darkTheme.background,
+    padding: 16,
+  },
+  cardContainer: {
+    width: '100%',
+    maxWidth: 400,
+    padding: 16,
+    alignItems: 'center',
   },
   text: {
     color: darkTheme.text,
@@ -80,18 +96,24 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: darkTheme.text,
+    textAlign: 'center',
   },
   school: {
     fontSize: 18,
     color: darkTheme.primary,
     marginBottom: 10,
+    textAlign: 'center',
+  },
+  bioContainer: {
+    width: '100%',
+    paddingHorizontal: 10,
   },
   bio: {
     fontSize: 16,
     color: darkTheme.text,
     marginBottom: 20,
-    paddingHorizontal: 20,
     textAlign: 'center',
+    width: '100%',
   },
   button: {
     backgroundColor: darkTheme.primary,
