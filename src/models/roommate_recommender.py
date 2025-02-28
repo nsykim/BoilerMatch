@@ -26,18 +26,15 @@ class RoommateRecommender:
             # Smoking dealbreaker: If either user has it set and the other smokes, skip
             if (target_prefs.get("smoking_dealbreaker", 0) == 1 and user_prefs.get("doesSmoke", 0) == 1) or \
             (user_prefs.get("smoking_dealbreaker", 0) == 1 and target_prefs.get("doesSmoke", 0) == 1):
-                print("smoke")
                 continue
 
             # Pets dealbreaker: If either user has it set and the other has pets, skip
             if (target_prefs.get("pets_dealbreaker", 0) == 1 and user_prefs.get("hasPets", 0) == 1) or \
             (user_prefs.get("pets_dealbreaker", 0) == 1 and target_prefs.get("hasPets", 0) == 1):
-                print("pets")
                 continue
 
             # Gender dealbreaker: If either user has a gender preference that the other does not match, skip
             if ((target_prefs.get("gender_dealbreaker", 0) == 1 or user_prefs.get("gender_dealbreaker", 0) == 1) and target_prefs.get("gender") != user.get("gender")):
-                print("sex")
                 continue
 
             filtered_matches.append(user)
