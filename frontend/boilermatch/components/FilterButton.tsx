@@ -2,8 +2,9 @@ import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/navigation/types"; // Ensure this exists
-import { Ionicons } from "@expo/vector-icons"; // Uses Ionicons for filter icon
+import { RootStackParamList } from "@/navigation/types";
+import { Ionicons } from "@expo/vector-icons";
+import { darkTheme } from "@/styles/theme"; // ✅ Import darkTheme for consistent colors
 
 const FilterButton = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -11,7 +12,7 @@ const FilterButton = () => {
   return (
     <TouchableOpacity 
       style={styles.button} 
-      onPress={() => navigation.navigate("Preferences")} // Navigates to Preferences screen
+      onPress={() => navigation.navigate("Preferences")}
     >
       <Ionicons name="filter-outline" size={24} color="white" />
     </TouchableOpacity>
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 90, // Distance from top of screen
     right: 15, // Distance from right side
-    backgroundColor: "#007AFF", // Blue color like iOS buttons (customizable)
+    backgroundColor: darkTheme.primary, // ✅ Same color as "Next" button
     padding: 12,
     borderRadius: 25,
     elevation: 5, // Android shadow

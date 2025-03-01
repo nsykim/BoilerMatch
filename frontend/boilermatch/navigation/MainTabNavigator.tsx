@@ -5,7 +5,9 @@ import SwipeScreen from "../screens/Home/SwipeScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
 import { Ionicons } from "@expo/vector-icons";
 import FilterButton from "@/components/FilterButton"; // ✅ Import FilterButton
+import LogoutButton from "@/components/LogoutButton"; // ✅ Import FilterButton
 import { View } from "react-native";
+import UserInfo from "@/screens/Auth/UserInfo";
 
 const Tab = createBottomTabNavigator();
 
@@ -23,8 +25,8 @@ export default function MainTabNavigator() {
                 iconName = "home";
               } else if (route.name === "Chat") {
                 iconName = "chatbubble";
-              } else if (route.name === "Settings") {
-                iconName = "settings";
+              } else if (route.name === "Profile") {
+                iconName = "person";
               }
 
               return <Ionicons name={iconName} size={size} color={color} />;
@@ -35,11 +37,12 @@ export default function MainTabNavigator() {
         >
           <Tab.Screen name="Home" component={SwipeScreen} />
           <Tab.Screen name="Chat" component={ChatScreen} />
-          <Tab.Screen name="Settings" component={SettingsScreen} />
+          <Tab.Screen name="Profile" component={UserInfo} />
         </Tab.Navigator>
 
         {/* ✅ Floating Filter Button (on all authenticated screens) */}
         <FilterButton />
+        <LogoutButton />
       </View>
     </>
   );
