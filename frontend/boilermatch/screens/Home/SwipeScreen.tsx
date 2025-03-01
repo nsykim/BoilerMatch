@@ -125,7 +125,7 @@ const SwipeScreen = () => {
     setCurrentIndex(prevIndex => {
       console.log(`Current index before update: ${prevIndex}, Total users: ${usersRef.current.length}`);
 
-      if (prevIndex < usersRef.current.length - 1) {
+      if (prevIndex < usersRef.current.length) {
           console.log(`Incrementing index from ${prevIndex} to ${prevIndex + 1}`);
           
           // Move to the next user
