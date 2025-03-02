@@ -6,9 +6,10 @@ import MainTabNavigator from "./MainTabNavigator";
 import { useAuth } from "@/contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator, View } from "react-native";
-import { isTokenExpired } from "@/api/api"; 
+import { isTokenExpired } from "@/api/api";
 import PreferencesScreen from "@/screens/Auth/Preferences";
-import UserInfo from "@/screens/Auth/UserInfo";
+import UserInfo from "@/screens/Auth/UserInfo";  
+import UserInfoRegister from "@/screens/Auth/UserInfoRegister"; // ✅ Import new registration page
 
 import type { RootStackParamList } from "@/navigation/types";
 
@@ -20,33 +21,34 @@ export default function AppNavigator() {
   const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem("session_token");
-        console.log("Stored Token in AsyncStorage:", storedToken);
-    
-        if (storedToken && !isTokenExpired(storedToken)) {
-          setToken(storedToken);
-          
-          // ✅ Log BEFORE setting `isNewUser`
-          const newUserFlag = await AsyncStorage.getItem("is_new_user");
-          console.log("🟢 Debug: Retrieved is_new_user BEFORE setting state:", newUserFlag);
-    
-          setIsNewUser(newUserFlag === "true");  // Ensure correct boolean conversion
-        } else {
-          await AsyncStorage.removeItem("session_token"); // Remove expired token
-          setToken(null);
-          setIsNewUser(false);
-        }
-      } catch (error) {
-        console.error("Error retrieving session token:", error);
-      } finally {
-        setLoading(false);
+  const checkLoginStatus = async () => {
+    try {
+      const storedToken = await AsyncStorage.getItem("session_token");
+      console.log("Stored Token in AsyncStorage:", storedToken);
+
+      if (storedToken && !isTokenExpired(storedToken)) {
+        setToken(storedToken);
+
+        const newUserFlag = await AsyncStorage.getItem("is_new_user");
+        console.log("🟢 Debug: Retrieved is_new_user BEFORE setting state:", newUserFlag);
+
+        // ✅ Ensure correct boolean conversion
+        setIsNewUser(newUserFlag === "true");
+      } else {
+        await AsyncStorage.removeItem("session_token");
+        setToken(null);
+        setIsNewUser(false);
       }
-    };
-  
-    checkLoginStatus();
-  }, []);
+    } catch (error) {
+      console.error("Error retrieving session token:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  checkLoginStatus();
+}, []);
+
 
   if (loading) {
     return (
@@ -64,22 +66,23 @@ export default function AppNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {token ? (
           isNewUser ? (
-            // ✅ If new user, force them through onboarding
+            // ✅ New users must go through onboarding
             <>
-              <Stack.Screen name="UserInfo" component={UserInfo} />
+              <Stack.Screen name="UserInfoRegister" component={UserInfoRegister} />
               <Stack.Screen name="Preferences" component={PreferencesScreen} />
               <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
             </>
           ) : (
-            // ✅ Otherwise, send them directly to the main app
-            <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
+            // ✅ Logged-in users go directly to main app
+            <>
+              <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
+              <Stack.Screen name="Preferences" component={PreferencesScreen} />
+            </>
           )
         ) : (
-          // ✅ If no token, show Auth stack
           <Stack.Screen name="Auth" component={AuthStack} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
-  
 }

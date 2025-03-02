@@ -3,16 +3,12 @@ import React, { useState } from 'react';
 import { darkTheme } from '@/styles/theme';
 import { apiPost } from '@/api/api';
 import { useAuth } from '@/contexts/AuthContext';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
-import { RouteProp } from '@react-navigation/native';
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-const UserInfo = () => {
+const UserInfoRegister = () => {
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
@@ -21,15 +17,7 @@ const UserInfo = () => {
     hobbies: '',
   });
   const { email, token } = useAuth();
-
-  // ✅ These lines must be inside the component
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute<RouteProp<RootStackParamList, 'UserInfo'>>();
-
-
-  // Check if user came from registration
-  const fromRegister = route.params?.fromRegister ?? false;
-
 
   const handleChange = (field: string, value: string) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
@@ -50,17 +38,14 @@ const UserInfo = () => {
     } catch (error: any) {
       console.error("API Error:", error);
     } finally {
-      // ✅ Only store the flag, but DO NOT navigate
       await AsyncStorage.setItem("is_new_user", "false");
       console.log("AFTER SAVING: is_new_user =", await AsyncStorage.getItem("is_new_user"));
+
+      // ✅ Always navigate to Preferences after saving
+      navigation.replace("Preferences");
     }
   };
-  
-  
-  
-    
 
-  
   return (
     <View style={styles.container}>
       <Text style={styles.header}>User Information</Text>
@@ -121,4 +106,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserInfo;
+export default UserInfoRegister;

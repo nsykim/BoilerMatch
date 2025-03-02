@@ -226,76 +226,72 @@ const SwipeScreen = () => {
 
   const renderCard = () => {
     console.log(`Rendering card. Users: ${users.length}, Current index: ${currentIndex}`);
-    
+  
     if (users.length === 0) {
-      console.log('No users available, showing loading state');
       return (
         <View style={styles.emptyStateContainer}>
           <Text style={styles.text}>Loading recommendations...</Text>
         </View>
       );
     }
-
+  
     if (currentIndex >= users.length) {
-      console.log('Current index exceeds users array length, showing empty state');
       return (
         <View style={styles.emptyStateContainer}>
           <Text style={styles.text}>No more recommendations available</Text>
         </View>
       );
     }
-
-    const user = users[currentIndex] ?? null;
-    if (!user || !user.userInfo) {
-      console.log("No valid user data, showing loading state.");
+  
+    const user = users[currentIndex];
+  
+    if (!user?.userInfo) {
+      console.log("User info is missing, skipping...");
       return (
         <View style={styles.emptyStateContainer}>
           <Text style={styles.text}>Loading user data...</Text>
         </View>
       );
     }
-
-    console.log(`Rendering user card for: ${user.userInfo.first_name}`);
-
-
+  
     return (
-      <Animated.View 
-        style={[styles.cardContainer, cardStyle]} 
-        {...panResponder.panHandlers}
-      >
+      <Animated.View style={[styles.cardContainer, cardStyle]} {...panResponder.panHandlers}>
         {/* Overlay indicators */}
         <Animated.View style={[styles.overlayLike, { opacity: likeOpacity }]}>
           <Text style={styles.overlayText}>LIKE</Text>
         </Animated.View>
-        
         <Animated.View style={[styles.overlayPass, { opacity: passOpacity }]}>
           <Text style={styles.overlayText}>PASS</Text>
         </Animated.View>
-        
+  
         {/* User details */}
-        <Text style={styles.name}>{user.userInfo.first_name} {user.userInfo.last_name}, {user.userInfo.age}</Text>
-        <Text style={styles.school}>{user.school}</Text>
-        
+        <Text style={styles.name}>
+          {user.userInfo.first_name ?? "Unknown"} {user.userInfo.last_name ?? ""}
+        </Text>
+        <Text style={styles.school}>{user.school ?? "No school listed"}</Text>
+  
         <View style={styles.bioContainer}>
-          <Text style={styles.bio}>{user.userInfo.bio}</Text>
+          <Text style={styles.bio}>{user.userInfo.bio ?? "No bio available"}</Text>
         </View>
-        
+  
         {user.userInfo.hobbies && user.userInfo.hobbies.length > 0 && (
           <View style={styles.hobbiesContainer}>
             <Text style={styles.hobbiesTitle}>Hobbies:</Text>
             <View style={styles.hobbiesTags}>
-            {Array.isArray(user.userInfo.hobbies) ? user.userInfo.hobbies.map((hobby, index) => (
-              <View key={index} style={styles.hobbyTag}>
-                <Text style={styles.hobbyText}>{hobby}</Text>
-              </View>
-            )) : null}
-
+              {Array.isArray(user.userInfo.hobbies)
+                ? user.userInfo.hobbies.map((hobby, index) => (
+                    <View key={index} style={styles.hobbyTag}>
+                      <Text style={styles.hobbyText}>{hobby}</Text>
+                    </View>
+                  ))
+                : null}
             </View>
           </View>
         )}
       </Animated.View>
     );
   };
+  
 
   console.log(`Render main component. Users: ${users.length}, Index: ${currentIndex}, Transitioning: ${isTransitioning}`);
   return (

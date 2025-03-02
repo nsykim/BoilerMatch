@@ -91,6 +91,13 @@ const AuthScreen = () => {
       // ✅ Only show success message, NO manual navigation
       Alert.alert("Success", "Logged in!");
 
+      // ✅ Correctly store new user flag
+      await AsyncStorage.setItem("is_new_user", "false");
+  
+      // ✅ Debug log to confirm flag is set
+      const checkNewUser = await AsyncStorage.getItem("is_new_user");
+      console.log("🟡 [DEBUG] AFTER REGISTERING: is_new_user =", checkNewUser);
+
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Something went wrong');
     } finally {

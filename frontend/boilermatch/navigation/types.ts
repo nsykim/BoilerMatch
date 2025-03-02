@@ -5,4 +5,5 @@ export type RootStackParamList = {
   Chat: undefined;
   Settings: undefined;
   UserInfo: { fromRegister?: boolean };
+  UserInfoRegister: undefined; // ✅ Add this line
 };

@@ -9,11 +9,19 @@ import { darkTheme } from "@/styles/theme"; // ✅ Import darkTheme for consiste
 const FilterButton = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  const goToPreferences = () => {
+    console.log("Current Navigation State:", navigation.getState());
+    
+    try {
+      navigation.navigate("Preferences"); // ✅ Directly navigate to Preferences
+    } catch (error) {
+      console.error("Navigation Error: Could not navigate to Preferences", error);
+    }
+  };
+  
+
   return (
-    <TouchableOpacity 
-      style={styles.button} 
-      onPress={() => navigation.navigate("Preferences")}
-    >
+    <TouchableOpacity style={styles.button} onPress={goToPreferences}>
       <Ionicons name="filter-outline" size={24} color="white" />
     </TouchableOpacity>
   );
