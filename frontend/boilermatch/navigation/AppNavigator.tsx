@@ -1,42 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack"; // ✅ Ensure stack is used
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AuthStack from "./AuthStack";
 import MainTabNavigator from "./MainTabNavigator";
 import { useAuth } from "@/contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator, View } from "react-native";
-import { isTokenExpired } from "@/api/api"; // Import validation function
-import PreferencesScreen from "@/screens/Auth/Preferences"; // ✅ Ensure correct path
-import UserInfo from "@/screens/Auth/UserInfo";  // ✅ Ensure correct path
+import { isTokenExpired } from "@/api/api"; 
+import PreferencesScreen from "@/screens/Auth/Preferences";
+import UserInfo from "@/screens/Auth/UserInfo";
 
-
-
-// ✅ Define Root Stack Types
-import type { RootStackParamList } from "@/navigation/types";  // ✅ Import from types.ts
-
+import type { RootStackParamList } from "@/navigation/types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   const { token, setToken } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [userInfo, setUserInfo] = useState(null);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         const storedToken = await AsyncStorage.getItem("session_token");
         console.log("Stored Token in AsyncStorage:", storedToken);
-  
+    
         if (storedToken && !isTokenExpired(storedToken)) {
           setToken(storedToken);
-          const storedUserInfo = await AsyncStorage.getItem("user_info");  // ✅ Fetch user info
-          setUserInfo(storedUserInfo ? JSON.parse(storedUserInfo) : null);  // ✅ Parse if exists
+          
+          // ✅ Log BEFORE setting `isNewUser`
+          const newUserFlag = await AsyncStorage.getItem("is_new_user");
+          console.log("🟢 Debug: Retrieved is_new_user BEFORE setting state:", newUserFlag);
+    
+          setIsNewUser(newUserFlag === "true");  // Ensure correct boolean conversion
         } else {
           await AsyncStorage.removeItem("session_token"); // Remove expired token
           setToken(null);
-          setUserInfo(null); // Reset user info
+          setIsNewUser(false);
         }
       } catch (error) {
         console.error("Error retrieving session token:", error);
@@ -57,23 +57,26 @@ export default function AppNavigator() {
   }
 
   console.log("Current Token:", token);
+  console.log("Is New User:", isNewUser);
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {token ? (
-          <>
-            {/* ✅ Preferences and MainTabNavigator should always be accessible */}
-            <Stack.Screen name="Preferences" component={PreferencesScreen} />
+          isNewUser ? (
+            // ✅ If new user, force them through onboarding
+            <>
+              <Stack.Screen name="UserInfo" component={UserInfo} />
+              <Stack.Screen name="Preferences" component={PreferencesScreen} />
+              <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
+            </>
+          ) : (
+            // ✅ Otherwise, send them directly to the main app
             <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
-  
-            {/* ✅ Show UserInfo only if the user comes from registration */}
-            <Stack.Screen name="UserInfo" component={UserInfo} />
-          </>
+          )
         ) : (
-          <>
-            <Stack.Screen name="Auth" component={AuthStack} />
-          </>
+          // ✅ If no token, show Auth stack
+          <Stack.Screen name="Auth" component={AuthStack} />
         )}
       </Stack.Navigator>
     </NavigationContainer>

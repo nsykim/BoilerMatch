@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';  // Define this if you haven't already
-
+import UserInfo from "@/screens/Auth/UserInfo";
 
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -29,39 +29,50 @@ const AuthScreen = () => {
 
   const handleRegister = async () => {
     if (!emailRegex.test(inputEmail)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
   
     if (!passwordRegex.test(password)) {
       Alert.alert(
-        'Weak Password',
-        'Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.'
+        "Weak Password",
+        "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."
       );
       return;
     }
   
     setLoading(true);
     try {
-      await apiPost('/create_account', { email: inputEmail, password, school });
+      await apiPost("/create_account", { email: inputEmail, password, school });
   
-      // Automatically log in after successful registration
-      const { session_token: token } = await apiPost('/login', { email: inputEmail, password });
+      // ✅ Log in after successful registration
+      const { session_token: token } = await apiPost("/login", { email: inputEmail, password });
   
       setEmail(inputEmail);
       setToken(token);
       await AsyncStorage.setItem("email", inputEmail);
       await AsyncStorage.setItem("session_token", token);
   
-      // Navigate to UserInfo first, then Preferences
-      navigation.navigate("UserInfo", { fromRegister: true });
+      // ✅ Correctly store new user flag
+      await AsyncStorage.setItem("is_new_user", "true");
+  
+      // ✅ Debug log to confirm flag is set
+      const checkNewUser = await AsyncStorage.getItem("is_new_user");
+      console.log("🟡 [DEBUG] AFTER REGISTERING: is_new_user =", checkNewUser);
+  
+      navigation.replace("UserInfo", {}); // ✅ Ensure correct transition
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Something went wrong');
+      Alert.alert("Error", error?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
-
+  
+  
+  
+  
+  
+  
   const handleLogin = async () => {
     if (!emailRegex.test(inputEmail)) {
       Alert.alert('Invalid Email', 'Please enter a valid email address.');
@@ -74,21 +85,19 @@ const AuthScreen = () => {
 
       setEmail(inputEmail);
       setToken(token);
-      await AsyncStorage.setItem("email", inputEmail)
-      await AsyncStorage.setItem("session_token", token)
+      await AsyncStorage.setItem("email", inputEmail);
+      await AsyncStorage.setItem("session_token", token);
 
-      //ROUTE TO PREFERENCES
-      Alert.alert("Success", "Logged in!", [
-        { text: "OK", onPress: () => navigation.navigate("Preferences") }
-      ]);
-      
-          
+      // ✅ Only show success message, NO manual navigation
+      Alert.alert("Success", "Logged in!");
+
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>

@@ -245,8 +245,18 @@ const SwipeScreen = () => {
       );
     }
 
-    const user = users[currentIndex];
+    const user = users[currentIndex] ?? null;
+    if (!user || !user.userInfo) {
+      console.log("No valid user data, showing loading state.");
+      return (
+        <View style={styles.emptyStateContainer}>
+          <Text style={styles.text}>Loading user data...</Text>
+        </View>
+      );
+    }
+
     console.log(`Rendering user card for: ${user.userInfo.first_name}`);
+
 
     return (
       <Animated.View 
@@ -274,11 +284,12 @@ const SwipeScreen = () => {
           <View style={styles.hobbiesContainer}>
             <Text style={styles.hobbiesTitle}>Hobbies:</Text>
             <View style={styles.hobbiesTags}>
-              {user.userInfo.hobbies.map((hobby, index) => (
-                <View key={index} style={styles.hobbyTag}>
-                  <Text style={styles.hobbyText}>{hobby}</Text>
-                </View>
-              ))}
+            {Array.isArray(user.userInfo.hobbies) ? user.userInfo.hobbies.map((hobby, index) => (
+              <View key={index} style={styles.hobbyTag}>
+                <Text style={styles.hobbyText}>{hobby}</Text>
+              </View>
+            )) : null}
+
             </View>
           </View>
         )}
@@ -294,7 +305,13 @@ const SwipeScreen = () => {
         <Text style={styles.statusText}>Passed: {passedUsers.length}</Text>
       </View>
 
-      {renderCard()}
+      {users.length === 0 ? (
+        <View style={styles.emptyStateContainer}>
+          <Text style={styles.text}>Loading recommendations...</Text>
+        </View>
+      ) : (
+        renderCard()
+      )}
       
       <View style={styles.instructions}>
         <Text style={styles.instructionsText}>Swipe right to like, left to pass</Text>

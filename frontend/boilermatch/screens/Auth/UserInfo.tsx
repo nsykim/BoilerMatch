@@ -9,6 +9,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import { RouteProp } from '@react-navigation/native';
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
 const UserInfo = () => {
   const [userInfo, setUserInfo] = useState({
     firstName: '',
@@ -44,16 +47,20 @@ const UserInfo = () => {
       }
       await apiPost('/set_user_info', { email, user_info: userInfo }, token);
     } catch (error: any) {
-      console.error("API Error:", error);  // ✅ Log the error but don’t block navigation
+      console.error("API Error:", error);
     } finally {
-      if (fromRegister) {
-        navigation.navigate("Preferences");  // ✅ Navigate even if API fails
-      } else {
-        Alert.alert('Success', 'User information saved.');
-      }
+      // ✅ Ensure `is_new_user` is set to "false"
+      await AsyncStorage.setItem("is_new_user", "false");
+      const checkNewUser = await AsyncStorage.getItem("is_new_user");
+      console.log("AFTER SAVING: is_new_user =", checkNewUser);
+  
+      // ✅ Ensure navigation to Preferences happens AFTER setting flag
+      navigation.replace("Preferences");
     }
   };
   
+  
+    
 
   
   return (
