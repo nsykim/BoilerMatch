@@ -1,5 +1,4 @@
 name: CI Tests
-
 on:
   push:
     branches:
@@ -7,13 +6,14 @@ on:
 
   pull_request:
     branches:
-      - 'integration/**'  # Run CI for PRs targeting "integration/" branches
+      - 'integration/**'  
 
 jobs:
   test:
     runs-on: ubuntu-latest
     
     env:
+      FIREBASE_CREDENTIALS_B64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       USER_NAME: ${{ secrets.USER_NAME }}
       PW: ${{ secrets.PW }} 
@@ -34,6 +34,10 @@ jobs:
           chmod +x run  # Ensure script is executable
           ./run install  # Install dependencies
 
+      - name: Decode and write Firebase credentials
+        run: |
+          echo "$FIREBASE_CREDENTIALS_B64" | base64 --decode > src/utils/firebase_creds.json
+        
       - name: Run Tests
         run: |
           source venv/bin/activate
