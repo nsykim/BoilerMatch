@@ -136,6 +136,9 @@ if [ "$command" = "install" ]; then
     exit $?
 elif [ "$command" = "build" ]; then
     start_api
+    cd frontend/boilermatch
+    npm i
+    npm start
     exit $?
 elif [ "$command" = "test:backend" ]; then
     run_backend_tests
