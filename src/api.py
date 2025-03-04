@@ -4,12 +4,21 @@ from flask import Flask, request, jsonify
 from database.db_operations import *
 import bcrypt
 from utils.jwt_utils import *
+from models.roommate_recommender import RoommateRecommender
 from utils.fetch_colleges import fetch_colleges
 import time
 from utils.firebase import *
 import hashlib
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={
+    r"/*": {
+        "origins": ["*"],  # CHANGE WHEN IN PROD
+        "methods": ["GET", "POST", "DELETE"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 @app.route('/delete_account/<email>', methods=['DELETE'])
 def delete_account(email):
@@ -26,13 +35,18 @@ def create_account():
     body = request.json
     email = body.get('email')
     pw = body.get('password')
+    school = body.get('school')
+
+    logging.info(f"email: {email}")
+    logging.info(f"password: {pw}")
+    logging.info(f"school: {school}")
 
     if len(pw) < 8:
         logging.info("create_account: password is too short")
         return '', 400
 
-    if email == None or pw == None:
-        logging.info("create_account: malformed request... username, email, or pw were not set")
+    if email == None or pw == None or school == None:
+        logging.info("create_account: malformed request... username, email, pw, or school were not set")
         return '', 400
     logging.info("create_account: all required fields were set")
 
@@ -44,18 +58,15 @@ def create_account():
         return '', 400
     logging.info("create_account: email address is unique")
 
-
     hashed_pw = bcrypt.hashpw(pw, bcrypt.gensalt(log_rounds=12))
 
-    success, result = create_user(table, email, hashed_pw) 
+    success, result = create_user(table, email, hashed_pw, school) 
     if success == True:
         logging.info("create_account: account successfully created")
-        return '', 200
+        return jsonify({"message": "account success"}), 200
     else:
         logging.error("create_account: account could not be created")
         return '', 500
-
-    
 
 @app.route('/login', methods=['GET'])
 def login():
@@ -97,6 +108,50 @@ def autocomplete_colleges():
     
     return jsonify({"colleges": result}), status_code
 
+@app.route('/get_roommate_recommendations', methods=['POST'])
+def get_roommate_recommendations():
+    # Get required fields
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers['Authorization']
+
+    if email == None:
+        logging.info("login: malformed request... email not set")
+        return '', 400
+    logging.info("login: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("roommate_recommendations: invalid session token")
+        return jsonify({"error": "Unauthorized"}), 401
+    logging.info("roommate_recommendations: valid session token")
+    
+    # Get target user
+    table = accounts_db["accounts"]
+    success, target_user = get_user_by_email(email, table)
+    
+    if not success or not target_user:
+        return jsonify({"error": "User not found"}), 404
+        
+    # Get target user's school
+    user_school = target_user.get("school")
+    if not user_school:
+        return jsonify({"error": "User school not found"}), 400
+        
+    # Get potential matches from same school
+    success, school_users = get_users_by_school(user_school, table)
+    if not success:
+        return jsonify({"error": "Failed to fetch potential matches"}), 500
+        
+    # Initialize recommender and get recommendations
+    recommender = RoommateRecommender(n_neighbors=20)
+    recommendations = recommender.get_recommendations(target_user, school_users)
+    
+    # Format and return recommendations
+    formatted_recommendations = recommender.format_recommendations(recommendations)
+    
+    return jsonify({
+        "recommendations": formatted_recommendations
+    }), 200
 
 @app.route('/set_preferences', methods=['POST'])
 def set_preferences():
@@ -126,11 +181,42 @@ def set_preferences():
     success = update_preferences(user, preferences, table, email)
     if success == True:
         logging.info("set_preferences: preferences successfully updated")
-        return session_token, 200
+        return jsonify({"message": "Preferences successfully updated"}), 200
     else:
         logging.error("set_preferences: preferences could not be updated")
         return session_token, 500
 
+@app.route('/set_user_info', methods=['POST'])
+def set_user_info():
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers.get('Authorization')
+    user_info = body.get('user_info')
+    
+    if not email or not session_token or not user_info:
+        logging.info("set_user_info: malformed request... missing email, session token, or user_info")
+        return session_token, 400
+    logging.info("set_user_info: all required fields were set")
+    
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("set_user_info: invalid session token")
+        return session_token, 401
+    logging.info("set_user_info: valid session token")
+    
+    table = accounts_db["accounts"]
+    success, user = get_user_by_email(email, table)
+    if not success or user is None:
+        logging.info("set_user_info: error fetching user")
+        return session_token, 500
+    
+    logging.info("User found: %s", user)
+    success = update_user_info(user, user_info, table, email)
+    if success:
+        logging.info("set_user_info: user info successfully updated")
+        return jsonify({"message": "User info successfully updated"}), 200
+    else:
+        logging.error("set_user_info: user info could not be updated")
+        return session_token, 500
 @app.route('/get_user_info', methods=['POST'])
 def get_user_info():
     body = request.json
@@ -296,4 +382,4 @@ if __name__ == '__main__':
     if success == False:
         logging.error("could not connect to the database")
         exit(1)
-    app.run(port=3020)
+    app.run(host="0.0.0.0", port=3020, debug=True)

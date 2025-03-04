@@ -5,6 +5,8 @@ from pymongo.errors import PyMongoError
 from dotenv import load_dotenv
 import hashlib
 import time
+import hashlib
+import time
 
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
@@ -18,17 +20,19 @@ load_dotenv()
 # 5 = Deal breaker
 
 empty_preferences = {
-    "Cleanliness": -1,
-    "Noise": -1,
-    "Social": -1,
-    "Sleep Schedule": -1,
-    "Smoking": -1,
-    "Pets": -1,
-    "Alcohol": -1,
-    "Gender": -1,
-    "Age": -1,
-    "Politics": -1,
-
+    "age": -1,
+    "alcohol": -1,
+    "cleanliness": -1,
+    "gender": "",
+    "noise": -1,
+    "hasPets": "",
+    "politics": -1,
+    "sleepSchedule": -1,
+    "doesSmoke": "",
+    "social": -1,
+    "smoking_dealbreaker": -1,
+    "pets_dealbreaker": -1,
+    "gender_dealbreaker": -1,
 }
 
 def connect_to_mongodb(database):
@@ -44,10 +48,11 @@ def connect_to_mongodb(database):
         logging.error('Error connecting to MongoDB: %s', error)
         return False, error
 
-def create_user(collection, email, pw_hash, preferences=empty_preferences, user_info=None):
+def create_user(collection, email, pw_hash, school, preferences=empty_preferences, user_info=None):
     new_user = {
         "email": email,
         "pwHash": pw_hash,
+        "school": school,
         "preferences": preferences,
         "userInfo": user_info,
         "chats": [],
@@ -70,6 +75,16 @@ def remove_user(email, collection):
     except PyMongoError as error:
         logging.error('Error removing user: %s', error)
         return False
+    
+def remove_all_users(collection):
+    try:
+        result = collection.delete_many({})
+        deleted_count = result.deleted_count
+        logging.info('Removed %d users from the database', deleted_count)
+        return True, deleted_count
+    except PyMongoError as error:
+        logging.error('Error removing all users: %s', error)
+        return False, error
 
 def get_user_by_email(email, collection):
     try:
@@ -83,6 +98,38 @@ def get_user_by_email(email, collection):
         logging.error('Error fetching user: %s', error)
         return False, error
 
+# FOR KNN
+def get_users_by_school(school, collection, limit=100):
+    try:
+        # Using aggregation pipeline to first match by school then get random sample
+        pipeline = [
+            # Match users where userInfo.school equals the provided school
+            {"$match": {"school": school}},
+            # Get random sample of matched documents
+            {"$sample": {"size": limit}},
+            # Project only the fields we want to return
+            {"$project": {
+                "email": 1,
+                "school": 1,
+                "userInfo": 1,
+                "preferences": 1,
+                "_id": 0  # Exclude the MongoDB _id field
+            }}
+        ]
+        
+        users = list(collection.aggregate(pipeline))
+        
+        if not users:
+            logging.info('No users found for school: %s', school)
+            return True, []
+        
+        logging.info('Found %d users for school: %s', len(users), school)
+        return True, users
+        
+    except PyMongoError as error:
+        logging.error('Error fetching users by school: %s', error)
+        return False, error
+
 def update_preferences(user, preferences, collection, email):
     try:
         collection.update_one({"email": email}, {"$set": {"preferences": preferences}}) 
@@ -91,6 +138,16 @@ def update_preferences(user, preferences, collection, email):
     except PyMongoError as error:
         logging.error('Error updating preferences: %s', error)
         return False
+    
+def update_user_info(user, user_info, collection, email):
+    try:
+        collection.update_one({"email": email}, {"$set": {"userInfo": user_info}})
+        user["userInfo"] = user_info
+        return True
+    except Exception as error:
+        logging.error("Error updating user info: %s", error)
+        return False
+    
 
 def update_chat(chat_id, collection, timestamp):
     try:

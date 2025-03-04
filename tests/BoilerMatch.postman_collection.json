@@ -78,7 +78,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"password\": \"sdkfdsfhs\"\r\n}",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"school\": \"Purdue University\", \r\n    \"password\": \"sdkfdsfhs\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -124,7 +124,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"password\": \"noahskim\"\r\n\r\n}",
+					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"school\": \"Purdue University\", \r\n    \"password\": \"noahskim\"\r\n\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
