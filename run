@@ -134,11 +134,14 @@ command=$1
 if [ "$command" = "install" ]; then
     install_dependencies
     exit $?
-elif [ "$command" = "build" ]; then
-    start_api
+elif [ "$command" = "build:fe" ]; then
     cd frontend/boilermatch
     npm i
     npm start
+    exit $?
+elif [ "$command" = "build:be" ]; then
+    cd src
+    start api
     exit $?
 elif [ "$command" = "test:backend" ]; then
     run_backend_tests
