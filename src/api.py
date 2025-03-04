@@ -108,7 +108,6 @@ def autocomplete_colleges():
     
     return jsonify({"colleges": result}), status_code
 
-# FOR KNN
 @app.route('/get_roommate_recommendations', methods=['POST'])
 def get_roommate_recommendations():
     # Get required fields
