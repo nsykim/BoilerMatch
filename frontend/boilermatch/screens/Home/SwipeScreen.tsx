@@ -282,6 +282,7 @@ const SwipeScreen = () => {
           {user.userInfo.first_name ?? "Unknown"} {user.userInfo.last_name ?? ""}
         </Text>
         <Text style={styles.bio}>{user.email}</Text>
+        <Text style={styles.bio}>{user.userInfo.age}</Text>
         <Text style={styles.school}>{user.school ?? "No school listed"}</Text>
   
         <View style={styles.bioContainer}>
