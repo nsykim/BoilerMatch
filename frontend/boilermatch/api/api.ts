@@ -2,7 +2,7 @@ import { Alert } from 'react-native';
 import { API_BASE_URL } from '@/config/config';
 import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { useAuth } from '@/contexts/AuthContext';
 
 //checks if your token expired
 export const isTokenExpired = (token: string): boolean => {
@@ -93,4 +93,4 @@ const apiPost = async (endpoint: string, body: object, token?: string) => {
   }
 };
 
-export { apiPost };
+export { apiGet, apiPost };
