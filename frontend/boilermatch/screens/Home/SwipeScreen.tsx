@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Alert, Dimensions, Animated, PanResponder } fro
 import { useAuth } from '@/contexts/AuthContext';
 import { apiPost } from '@/api/api';
 import { darkTheme } from '@/styles/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface User {
   email: string;
@@ -80,19 +81,6 @@ const SwipeScreen = () => {
     fetchRecommendations();
   }, [email, token]);
 
-  // Log whenever users state changes
-  useEffect(() => {
-    console.log(`Users state updated: ${users.length} users available`);
-  }, [users]);
-
-  // Log whenever currentIndex changes
-  useEffect(() => {
-    console.log(`Current index changed to: ${currentIndex}`);
-    if (users.length > 0 && currentIndex < users.length) {
-      console.log(`Now showing user: ${users[currentIndex].userInfo.first_name}`);
-    }
-  }, [currentIndex, users]);
-
   const handleSwipeLeft = (user: User) => {
     console.log(`=== SWIPE LEFT for ${user.userInfo.first_name} ===`);
     setPassedUsers(prev => {
@@ -103,13 +91,37 @@ const SwipeScreen = () => {
     advanceToNextUser();
   };
 
+  const handleLike = async (user: User) => {
+    console.log(`=== LIKING ${user.userInfo.first_name} ===`);
+  
+    try {
+      if (!token) {
+        console.error("Session token is missing");
+        throw new Error("Invalid session token");
+      }
+  
+      const response = await apiPost(
+        "/like",
+        { email, other: user.email },
+        token
+      );
+  
+      if (response && response.chat_id) {
+        console.log(`Match created, chat ID: ${response.chat_id}`);
+      } else {
+        console.log("Like registered, but no match yet.");
+      }
+    } catch (error: any) {
+      console.error("Error liking user:", error.message);
+      Alert.alert("Error", error.message || "Failed to like user.");
+    }
+  };
+  
   const handleSwipeRight = (user: User) => {
     console.log(`=== SWIPE RIGHT for ${user.userInfo.first_name} ===`);
-    setLikedUsers(prev => {
-      console.log(`Adding user to liked list. New count: ${prev.length + 1}`);
-      return [...prev, user];
-    });
-    console.log('Calling advanceToNextUser() from handleSwipeRight');
+    handleLike(user);
+    setLikedUsers((prev) => [...prev, user]);
+    console.log("Calling advanceToNextUser() from handleSwipeRight");
     advanceToNextUser();
   };
 
@@ -124,8 +136,8 @@ const SwipeScreen = () => {
     
     setCurrentIndex(prevIndex => {
       console.log(`Current index before update: ${prevIndex}, Total users: ${usersRef.current.length}`);
-
-      if (prevIndex < usersRef.current.length) {
+      
+      if (usersRef.current.length >= 0) {
           console.log(`Incrementing index from ${prevIndex} to ${prevIndex + 1}`);
           
           // Move to the next user
@@ -172,10 +184,10 @@ const SwipeScreen = () => {
             console.log(`Right animation finished: ${finished}`);
   
             setUsers((prevUsers) => {
+              console.log(prevUsers[0])
               if (prevUsers.length > 0) {
                 console.log(`Calling handleSwipeRight for user: ${prevUsers[0].userInfo.first_name}`);
                 handleSwipeRight(prevUsers[0]);
-                return prevUsers;
                 return prevUsers.slice(1); // Remove swiped user
               } else {
                 console.error('No users left to swipe right.');
@@ -200,7 +212,6 @@ const SwipeScreen = () => {
               if (prevUsers.length > 0) {
                 console.log(`Calling handleSwipeLeft for user: ${prevUsers[0].userInfo.first_name}`);
                 handleSwipeLeft(prevUsers[0]);
-                return prevUsers;
                 return prevUsers.slice(1); // Remove swiped user
               } else {
                 console.error('No users left to swipe left.');
@@ -225,7 +236,9 @@ const SwipeScreen = () => {
   ).current;  
 
   const renderCard = () => {
-    console.log(`Rendering card. Users: ${users.length}, Current index: ${currentIndex}`);
+    console.log(
+      `Render card. Users: [${users.map(user => user.email).join(", ")}], Current User: ${users[0]?.email}, Transitioning: ${isTransitioning}`
+    );
   
     if (users.length === 0) {
       return (
@@ -243,7 +256,7 @@ const SwipeScreen = () => {
       );
     }
   
-    const user = users[currentIndex];
+    const user = users[0];
   
     if (!user?.userInfo) {
       console.log("User info is missing, skipping...");
@@ -268,6 +281,7 @@ const SwipeScreen = () => {
         <Text style={styles.name}>
           {user.userInfo.first_name ?? "Unknown"} {user.userInfo.last_name ?? ""}
         </Text>
+        <Text style={styles.bio}>{user.email}</Text>
         <Text style={styles.school}>{user.school ?? "No school listed"}</Text>
   
         <View style={styles.bioContainer}>
@@ -291,9 +305,7 @@ const SwipeScreen = () => {
       </Animated.View>
     );
   };
-  
 
-  console.log(`Render main component. Users: ${users.length}, Index: ${currentIndex}, Transitioning: ${isTransitioning}`);
   return (
     <View style={styles.container}>
       <View style={styles.statusContainer}>

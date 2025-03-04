@@ -96,7 +96,7 @@ const AuthScreen = () => {
   
       // ✅ Debug log to confirm flag is set
       const checkNewUser = await AsyncStorage.getItem("is_new_user");
-      console.log("🟡 [DEBUG] AFTER REGISTERING: is_new_user =", checkNewUser);
+      console.log("🟡 [DEBUG] AFTER LOGIN: is_new_user =", checkNewUser);
 
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Something went wrong');

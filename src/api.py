@@ -68,7 +68,7 @@ def create_account():
         logging.error("create_account: account could not be created")
         return '', 500
 
-@app.route('/login', methods=['GET'])
+@app.route('/login', methods=['POST'])
 def login():
     body = request.json
     email = body.get('email')
@@ -357,7 +357,7 @@ def like():
         return '', 500
     elif success == True and id == 1:
         logging.info("match: added like onto %s", other)
-        return '', 200
+        return jsonify({"message": "Like added."}), 200
     elif success == True:
         logging.info("match: users matched")
         return jsonify({"chat_id" : id}), 200
