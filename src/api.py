@@ -6,6 +6,9 @@ import bcrypt
 from utils.jwt_utils import *
 from models.roommate_recommender import RoommateRecommender
 from utils.fetch_colleges import fetch_colleges
+import time
+from utils.firebase import *
+import hashlib
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -55,7 +58,7 @@ def create_account():
         return '', 400
     logging.info("create_account: email address is unique")
 
-    hashed_pw = bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt(rounds=12)).decode('utf-8')
+    hashed_pw = bcrypt.hashpw(pw, bcrypt.gensalt(log_rounds=12))
 
     success, result = create_user(table, email, hashed_pw, school) 
     if success == True:
@@ -65,7 +68,7 @@ def create_account():
         logging.error("create_account: account could not be created")
         return '', 500
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET'])
 def login():
     body = request.json
     email = body.get('email')
@@ -87,11 +90,11 @@ def login():
         return '', 400
 
     stored_hash = user["pwHash"]
-    check_hash = bcrypt.hashpw(pw.encode('utf-8'), stored_hash.encode('utf-8')).decode()
+    check_hash = bcrypt.hashpw(pw, stored_hash)
     if stored_hash == check_hash: # check if passwords match. do this because bcrypt.checkpw is not working... temporary i hope
         logging.info("login: password matches")
         return jsonify({"session_token": generate_jwt(user["email"])}), 200
-    else:
+    else: 
         logging.info("login: password does not match")
         return '', 400
     
@@ -215,9 +218,162 @@ def set_user_info():
     else:
         logging.error("set_user_info: user info could not be updated")
         return session_token, 500
+@app.route('/get_user_info', methods=['POST'])
+def get_user_info():
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers['Authorization']
+
+    if email == None or session_token == None:
+        logging.info("get_user_info: malformed request... username, email, or pw were not set")
+        return session_token, 400
+    logging.info("get_user_info: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("get_user_info: invalid session token")
+        return session_token, 401
+    logging.info("get_user_info: valid session token")
+
+    table = accounts_db["accounts"]
+
+    success, user = get_user_by_email(email, table)
+    if success == False or user == None:
+        logging.info("get_user_info: error fetching user")
+        return session_token, 500
+    
+    logging.info("user: %s", user)
+    user["_id"] = str(user["_id"])
+    return jsonify(user), 200
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    body = request.json
+    chat_id = request.headers['chat_id']
+    content = body.get('content')
+    session_token = request.headers['Authorization']
+    email = body.get('email')
+
+    if chat_id == None or content == None or email == None:
+        logging.info("send_message: malformed request... chat_id, content, or email were not set")
+        return '', 400
+    logging.info("send_message: all required fields were set") 
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("send_message: invalid session token")
+        return session_token, 401
+    logging.info("send_message: valid session token")
+
+    table = accounts_db["accounts"]
+    if fb_send_message(chat_id, email, content, table):
+        logging.info("send_message: message sent successfully")
+        return '', 200
+    else:
+        logging.error("send_message: message could not be sent")
+        return '', 500
+    
+@app.route('/open_chat', methods=['POST'])
+def open_chat():
+    body = request.json
+    chat_id = request.headers['chat_id']
+    session_token = request.headers['Authorization']
+    email = body.get('email')
+
+    if chat_id == None or email == None:
+        logging.info("open_chat: malformed request... chat_id, content, or email were not set")
+        return '', 400
+    logging.info("open_chat: all required fields were set") 
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("open_chat: invalid session token")
+        return session_token, 401
+    logging.info("open_chat: valid session token")
+
+    chat_history = fetch_chat_history(chat_id)
+    
+    if chat_history == None:
+        logging.error("open_chat: error fetching chat history")
+        return '', 500
+    logging.info("open_chat: chat history fetched successfully")
+
+
+    return jsonify(chat_history), 200
+
+@app.route('/chats_page', methods=['POST'])
+def chats_page():
+    body = request.json
+    email = body.get('email')
+    session_token = request.headers['Authorization']
+
+    if email == None:
+        logging.info("chats_page: malformed request... email was not set")
+        return '', 400
+    logging.info("chats_page: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("chats_page: invalid session token")
+        return '', 401
+    logging.info("chats_page: valid session token")
+
+    table = accounts_db["accounts"]
+    
+    sorted_chats = sort_chats(table, email)
+    if sorted_chats == None:
+        logging.info("chats_page: error retrieving or sorting chats")
+        return '', 500
+    elif sorted_chats == -1:
+        logging.info("chats_page: no chats found")
+        return None, 200
+    else:
+        logging.info("chats_page: chats sorted successfully")
+        return jsonify(sorted_chats), 200 # WILL NEED TO UPDATE TO RETURN OTHER USER NAME NOT EMAIL
+
+
+@app.route('/like', methods=['POST'])
+def like():
+    body = request.json
+    email = body.get('email')
+    other = body.get('other')    
+    session_token = request.headers['Authorization']
+
+    if email == None:
+        logging.info("match: malformed request... email was not set")
+        return '', 400
+    logging.info("match: all required fields were set")
+
+    if validate_jwt(session_token)['email'] != email:
+        logging.info("match: invalid session token")
+        return session_token, 401
+    logging.info("match: valid session token")
+
+    table = accounts_db["accounts"]
+    success, id = add_like(table, email, other)
+    if success == False and (id == 1 or id == -2):
+        logging.info("match: error fetching user")
+        return '', 500
+    elif success == False and id == -1:
+        logging.info("match: users have already been matched")
+        return '', 403
+    elif success == False and type(id) == PyMongoError:
+        logging.info("match: error matching users")
+        return '', 500
+    elif success == True and id == 1:
+        logging.info("match: added like onto %s", other)
+        return '', 200
+    elif success == True:
+        logging.info("match: users matched")
+        return jsonify({"chat_id" : id}), 200
+
+@app.route('/delete_chatlog', methods=['DELETE'])
+def delete_chatlog():
+    chat_id = request.headers['chat_id']
+    
+    if delete_chat(chat_id):
+        return '', 200
+    else:
+        return '', 500
+
 
 accounts_db = None
-chats_db = None
 if __name__ == '__main__':
     success, accounts_db = connect_to_mongodb("accounts")
     if success == False:

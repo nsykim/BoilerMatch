@@ -57,7 +57,7 @@
 			"response": []
 		},
 		{
-			"name": "create_account success",
+			"name": "create_account 1 success",
 			"event": [
 				{
 					"listen": "test",
@@ -78,7 +78,53 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"password\": \"sdkfdsfhs\"\r\n\r\n}",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"school\": \"Purdue University\", \r\n    \"password\": \"sdkfdsfhs\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/create_account",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"create_account"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_account 2 success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"school\": \"Purdue University\", \r\n    \"password\": \"noahskim\"\r\n\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -155,7 +201,7 @@
 			"response": []
 		},
 		{
-			"name": "login success",
+			"name": "login success 1",
 			"event": [
 				{
 					"listen": "test",
@@ -163,7 +209,7 @@
 						"exec": [
 							"pm.test(\"Response status code is 200\", function () {\r",
 							"  pm.response.to.have.status(200);\r",
-							"  pm.environment.set(\"session_token\", pm.response.json().session_token);\r",
+							"  pm.environment.set(\"st1\", pm.response.json().session_token);\r",
 							"})"
 						],
 						"type": "text/javascript",
@@ -183,6 +229,58 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"password\": \"sdkfdsfhs\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/login",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login success 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"  pm.response.to.have.status(200);\r",
+							"  pm.environment.set(\"st2\", pm.response.json().session_token);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"password\": \"noahskim\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -285,7 +383,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "{{session_token}}",
+						"value": "{{st1}}",
 						"type": "text"
 					},
 					{
@@ -296,7 +394,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\", \r\n    \"preferences\": {\r\n        \"Cleanliness\": 4,\r\n        \"Noise\": 1,\r\n        \"Social\": 3,\r\n        \"Sleep Schedule\": 4,\r\n        \"Smoking\": 0,\r\n        \"Pets\": 2,\r\n        \"Alcohol\": 3,\r\n        \"Gender\": 2,\r\n        \"Age\": 1,\r\n        \"Politics\": 1\r\n    }\r\n\r\n}",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\", \r\n    \"preferences\": {\r\n        \"Cleanliness\": 4,\r\n        \"Noise\": 1,\r\n        \"Social\": 3,\r\n        \"Sleep Schedule\": 4,\r\n        \"Smoking\": 0,\r\n        \"Pets\": 2,\r\n        \"Alcohol\": 3,\r\n        \"Gender\": 2,\r\n        \"Age\": 1,\r\n        \"Politics\": 1\r\n    }\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -321,7 +419,409 @@
 			"response": []
 		},
 		{
-			"name": "Delete account",
+			"name": "acc1 like acc2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st1}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\", \r\n\t\"other\": \"noah@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/like",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"like"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc2 matches acc1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"\tpm.environment.set(\"chat_id\", pm.response.json().chat_id);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st2}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"other\": \"fsdfds@gmail.com\", \r\n\t\"email\": \"noah@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/like",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"like"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc2 opens empty chat",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st2}}",
+						"type": "text"
+					},
+					{
+						"key": "chat_id",
+						"value": "{{chat_id}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n\t\"email\": \"noah@gmail.com\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/open_chat",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"open_chat"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc2 sends msg",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Fixed syntax error by adding a semicolon at the end of the first test call\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st2}}",
+						"type": "text"
+					},
+					{
+						"key": "chat_id",
+						"value": "{{chat_id}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n\t\"email\": \"noah@gmail.com\",\r\n\t\"content\" : \"hi this is a message\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/send_message",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"send_message"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc2 opens chat after msg",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"\tpm.environment.set(\"chat_id\", pm.response.json().chat_id);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st2}}",
+						"type": "text"
+					},
+					{
+						"key": "chat_id",
+						"value": "{{chat_id}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n\t\"email\": \"noah@gmail.com\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/open_chat",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"open_chat"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc1 opens chat after msg",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st1}}",
+						"type": "text"
+					},
+					{
+						"key": "chat_id",
+						"value": "{{chat_id}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n\t\"email\": \"fsdfds@gmail.com\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/open_chat",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"open_chat"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc1 get info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st1}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/get_user_info",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"get_user_info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete acc1",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -347,167 +847,73 @@
 			"response": []
 		},
 		{
-			"name": "autocomplete_colleges success",
-			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Status code is 200\", function () {",
-					"    pm.response.to.have.status(200);",
-					"});",
-					"",
-					"pm.test(\"Response has colleges array\", function () {",
-					"    const responseData = pm.response.json();",
-					"    pm.expect(responseData).to.have.property('colleges');",
-					"    pm.expect(responseData.colleges).to.be.an('array');",
-					"});",
-					"",
-					"pm.test(\"Colleges match search query\", function () {",
-					"    const responseData = pm.response.json();",
-					"    const query = pm.request.url.query.get('q').toLowerCase();",
-					"    responseData.colleges.forEach(function(college) {",
-					"        pm.expect(college.toLowerCase()).to.include(query);",
-					"    });",
-					"});"
-				  ],
-				  "type": "text/javascript"
-				}
-			  }
-			],
+			"name": "delete acc2",
 			"request": {
-			  "method": "GET",
-			  "header": [],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/autocomplete_colleges?q=purdue",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["autocomplete_colleges"],
-				"query": [
-				  {
-					"key": "q",
-					"value": "purdue"
-				  }
-				]
-			  }
-			}
-		  },
-		  {
-			"name": "autocomplete_colleges fail: empty query",
-			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Response status code is 400\", function () {",
-					"    pm.response.to.have.status(400);",
-					"});",
-					"",
-					"pm.test(\"Error message mentions query parameter\", function () {",
-					"    pm.expect(pm.response.text()).to.include('Query parameter');",
-					"});"
-				  ],
-				  "type": "text/javascript"
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3020/delete_account/noah@gmail.com",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"delete_account",
+						"noah@gmail.com"
+					]
 				}
-			  }
-			],
+			},
+			"response": []
+		},
+		{
+			"name": "delete chat",
 			"request": {
-			  "method": "GET",
-			  "header": [],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/autocomplete_colleges",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["autocomplete_colleges"]
-			  }
-			}
-		  },
-		  {
-			"name": "get_roommate_recommendations success",
-			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Status code is 200\", function () {",
-					"    pm.response.to.have.status(200);",
-					"});",
-					"",
-					"pm.test(\"Response has recommendations array\", function () {",
-					"    const responseData = pm.response.json();",
-					"    pm.expect(responseData).to.have.property('recommendations');",
-					"    pm.expect(responseData.recommendations).to.be.an('array');",
-					"});",
-					"",
-					"pm.test(\"Each recommendation has required properties\", function () {",
-					"    const responseData = pm.response.json();",
-					"    responseData.recommendations.forEach(function(recommendation) {",
-					"        pm.expect(recommendation).to.have.property('email');",
-					"        pm.expect(recommendation).to.have.property('compatibility_score');",
-					"        pm.expect(recommendation.compatibility_score).to.be.within(0, 100);",
-					"    });",
-					"});"
-				  ],
-				  "type": "text/javascript"
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "chat_id",
+						"value": "{{chat_id}}",
+						"type": "text"
+					},
+					{
+						"key": "chat_id",
+						"value": "a068abf40a21e865",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "chat_id",
+						"value": " ",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:3020/delete_chatlog",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"delete_chatlog"
+					]
 				}
-			  }
-			],
-			"request": {
-			  "method": "GET",
-			  "header": [
-				{
-				  "key": "Authorization",
-				  "value": "{{session_token}}",
-				  "type": "text"
-				}
-			  ],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/get_roommate_recommendations",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["get_roommate_recommendations"]
-			  }
-			}
-		  },
-		  {
-			"name": "get_roommate_recommendations fail: unauthorized",
-			"event": [
-			  {
-				"listen": "test",
-				"script": {
-				  "exec": [
-					"pm.test(\"Response status code is 401\", function () {",
-					"    pm.response.to.have.status(401);",
-					"});",
-					"",
-					"pm.test(\"Error message mentions authentication\", function () {",
-					"    pm.expect(pm.response.text()).to.include('unauthorized');",
-					"});"
-				  ],
-				  "type": "text/javascript"
-				}
-			  }
-			],
-			"request": {
-			  "method": "GET",
-			  "header": [
-				{
-				  "key": "Authorization",
-				  "value": "invalid-token",
-				  "type": "text"
-				}
-			  ],
-			  "url": {
-				"raw": "http://127.0.0.1:3020/get_roommate_recommendations",
-				"protocol": "http",
-				"host": ["127", "0", "0", "1"],
-				"port": "3020",
-				"path": ["get_roommate_recommendations"]
-			  }
-			}
+			},
+			"response": []
 		}
 	]
 }

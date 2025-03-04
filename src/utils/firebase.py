@@ -1,0 +1,75 @@
+import firebase_admin
+from firebase_admin import credentials, firestore
+from dotenv import load_dotenv  
+import time
+import json
+import sys
+import os
+import logging
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+from src.database.db_operations import update_chat
+
+load_dotenv()
+
+if not firebase_admin._apps: # only perform this if firebase has not been initialized
+    with open("src/utils/firebase_creds.json") as f:
+        firebase_config = json.load(f)
+        
+    cred = credentials.Certificate(firebase_config)
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+def fb_send_message(chat_id, sender, content, collection):
+    timestamp = int(time.time())
+    logging.info("Sending message at timestamp: %s", timestamp)
+    try:
+        message_ref = db.collection("chats").document(chat_id).collection("messages").document()
+        message_ref.set({
+            "sender": sender,
+            "content": content,
+            "timestamp": timestamp
+        })
+        logging.info("Message sent to firebase successfully")
+    except Exception as e:
+        logging.error("Error sending message to firebase: %s", e)
+        return False
+    try:
+        logging.info("ALLUAHACKBAR %s", chat_id)
+        success = update_chat(chat_id, collection, timestamp)   
+        if success == False:
+            logging.error("Error updating chat in mongo database")
+            return False
+        logging.info("Chat updated successfully in mongo")
+        return True
+    except Exception as e:
+        logging.error("Error updating chat in mongo database: %s", e)
+        return False
+
+def fetch_chat_history(chat_id):
+    try:
+        messages_ref = db.collection("chats").document(chat_id).collection("messages")
+        messages = messages_ref.order_by("timestamp").stream()
+        chat_history = [{"id": message.id, **message.to_dict()} for message in messages]
+        logging.info("Chat history fetched successfully")
+        return chat_history
+    except Exception as e:
+        logging.error("Error fetching chat history: %s", e)
+        return None
+
+def delete_chat(chat_id):
+    try:
+        doc_ref = db.collection("chats").document(chat_id)
+        doc = doc_ref.get()
+
+        message_ref = doc_ref.collection("messages")
+        messages = message_ref.stream()
+        for message in messages:
+            message.reference.delete()
+        
+        doc_ref.delete()
+        logging.info("Chat deleted successfully")
+        return True
+    except Exception as e:
+        logging.error("Error deleting chat: %s", e)
+        return False

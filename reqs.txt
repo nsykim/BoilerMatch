@@ -12,3 +12,4 @@ numpy
 scikit-learn
 typing
 flask-cors
+firebase-admin
