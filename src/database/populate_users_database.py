@@ -36,7 +36,7 @@ def generate_random_user_info():
         "last_name": random.choice(LAST_NAMES),
         "age": random.randint(18, 30),
         "bio": "I'm a student at Purdue, interested in meeting new people!",
-        "hobbies": random.sample(HOBBIES, k=random.randint(2, 4))
+        "hobbies": str(random.sample(HOBBIES, k=random.randint(2, 4)))
     }
 
 def populate_database():

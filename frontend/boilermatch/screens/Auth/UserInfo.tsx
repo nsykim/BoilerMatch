@@ -14,8 +14,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const UserInfo = () => {
   const [userInfo, setUserInfo] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     age: '',
     bio: '',
     hobbies: '',
@@ -36,7 +36,7 @@ const UserInfo = () => {
   };
 
   const handleSubmit = async () => {
-    if (!userInfo.firstName || !userInfo.lastName || !userInfo.age || !userInfo.bio) {
+    if (!userInfo.first_name || !userInfo.last_name || !userInfo.age || !userInfo.bio) {
       Alert.alert('Error', 'Please fill out all required fields.');
       return;
     }
