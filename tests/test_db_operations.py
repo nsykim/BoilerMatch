@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 import os
 import sys
 import hashlib
+import hashlib
 
 # Mock the entire MongoDB client before importing the module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))

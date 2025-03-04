@@ -8,6 +8,7 @@ coverage
 pyjwt
 subprocess.run
 requests
+firebase-admin
 numpy
 scikit-learn
 typing
