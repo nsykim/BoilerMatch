@@ -140,7 +140,6 @@ elif [ "$command" = "build:fe" ]; then
     npm start
     exit $?
 elif [ "$command" = "build:be" ]; then
-    cd src
     start_api
     exit $?
 elif [ "$command" = "test:backend" ]; then
