@@ -141,7 +141,7 @@ elif [ "$command" = "build:fe" ]; then
     exit $?
 elif [ "$command" = "build:be" ]; then
     cd src
-    start api
+    start_api
     exit $?
 elif [ "$command" = "test:backend" ]; then
     run_backend_tests
