@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "e322db84-bbdb-4cc8-b83e-ee892437bca3"
+      }
+    },
+    "android": {
+      "package": "com.ninjabutz.boilermatch"
+    }
+  }
+}
