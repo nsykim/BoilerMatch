@@ -13,6 +13,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "newman": "^6.2.1"
+    "@types/react": "~18.3.12",
+    "newman": "^6.2.1",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "expo": "^50.0.16",
+    "react": "^18.2.0",
+    "react-native": "^0.73.5"
   }
 }
