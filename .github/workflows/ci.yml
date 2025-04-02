@@ -89,3 +89,4 @@ jobs:
         with:
           name: app-release
           path: frontend/boilermatch/app-release.apk
+
