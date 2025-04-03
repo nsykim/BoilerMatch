@@ -3,6 +3,9 @@ import { AuthProvider } from './contexts/AuthContext';
 import AppNavigator from './navigation/AppNavigator';
 import AuthScreen from './screens/Auth/AuthScreen';
 import Preferences from './screens/Auth/Preferences';
+//import { SafeAreaView } from 'react-native';
+//import UserInfo from './screens/Auth/UserInfo'; // adjust path if needed
+
 
 const App = () => {
   return (

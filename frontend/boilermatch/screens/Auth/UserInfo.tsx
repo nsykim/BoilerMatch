@@ -11,6 +11,11 @@ import { RouteProp } from '@react-navigation/native';
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+//IMAGE Section
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'react-native'; // Add this for image preview
+
+
 
 const UserInfo = () => {
   const [userInfo, setUserInfo] = useState({
@@ -22,9 +27,14 @@ const UserInfo = () => {
   });
   const { email, token } = useAuth();
 
+  //for image picking
+  const [image, setImage] = useState<string | null>(null);
+
   // ✅ These lines must be inside the component
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'UserInfo'>>();
+  //const navigation = { navigate: () => {} } as any;
+  //const route = { params: { fromRegister: false } } as any;
 
 
   // Check if user came from registration
@@ -34,6 +44,8 @@ const UserInfo = () => {
   const handleChange = (field: string, value: string) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
   };
+
+
 
   const handleSubmit = async () => {
     if (!userInfo.first_name || !userInfo.last_name || !userInfo.age || !userInfo.bio) {
@@ -45,7 +57,7 @@ const UserInfo = () => {
       if (!token) {
         throw new Error("Invalid session token");
       }
-      await apiPost('/set_user_info', { email, user_info: userInfo }, token);
+      await apiPost('/set_user_info', { email, user_info: userInfo, image }, token);
       console.log("User Info Saved Successfully!");
     } catch (error: any) {
       console.error("API Error:", error);
@@ -56,7 +68,26 @@ const UserInfo = () => {
     }
   };
   
-  
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Camera roll permissions are required.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets[0].base64) {
+      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setImage(base64Image);
+    }
+  };
+
   
     
 
@@ -75,6 +106,18 @@ const UserInfo = () => {
             value={userInfo[key as keyof typeof userInfo]}
           />
         ))}
+
+        {image && (
+          <Image
+            source={{ uri: image }}
+            style={{ width: 200, height: 200, borderRadius: 10, marginBottom: 15 }}
+          />
+        )}
+
+        <TouchableOpacity style={styles.submitButton} onPress={handlePickImage}>
+          <Text style={styles.submitButtonText}>Upload Profile Image</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Save</Text>
         </TouchableOpacity>
