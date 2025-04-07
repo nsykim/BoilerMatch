@@ -371,6 +371,26 @@ def delete_chatlog():
     else:
         return '', 500
 
+@app.route('/clear_db', methods=['DELETE'])
+def clear_db():
+    # TEMPORARY FUNCTION FOR TESTING PURPOSES
+    try:
+        success = clear_mongo(accounts_db["accounts"])
+        if success == False:
+            logging.error("Error clearing accounts database")
+            return '', 500
+        success = delete_chats_collection() 
+        if success == False:
+            logging.error("Error clearing chats database")
+            return '', 500  
+    except Exception as e:
+        logging.error("Error clearing database: %s", e)
+        return '', 500
+
+    if success == True:
+        return '', 200
+    else:
+        return '', 500
 
 accounts_db = None
 if __name__ == '__main__':

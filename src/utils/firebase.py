@@ -73,3 +73,33 @@ def delete_chat(chat_id):
     except Exception as e:
         logging.error("Error deleting chat: %s", e)
         return False
+
+def delete_chats_collection():
+    chats_ref = db.collection("chats")
+    try: 
+        chats_docs = list(chats_ref.stream())
+        logging.info("There are %d chats to delete", len(chats_docs))
+        for chat_doc in chats_docs:
+            messages_ref = chat_doc.reference.collection("messages")
+            delete_messages_subcollection(messages_ref)
+            chat_doc.reference.delete()
+        logging.info("All chats deleted successfully")
+        return True
+    except Exception as e:
+        logging.error("Error deleting chats collection: %s", e)
+        return False
+
+def delete_messages_subcollection(messages_ref, batch_size = 10):
+    try:
+        docs = messages_ref.limit(batch_size).stream()
+        deleted_count = 0
+        for doc in docs:
+            doc.reference.delete()
+            deleted_count += 1
+        if deleted_count >= batch_size:
+            delete_messages_subcollection(messages_ref, batch_size)
+        logging.info("Deleted %d messages from subcollection", deleted_count)
+        return True
+    except Exception as e:
+        logging.error("Error deleting messages subcollection: %s", e)
+        return False

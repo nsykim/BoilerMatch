@@ -230,3 +230,12 @@ def match_users(collection, email1, email2):
     except PyMongoError as error:
         logging.error('Error matching users: %s', error)
         return False, error
+
+def clear_mongo(collection):
+    try:
+        collection.drop()
+        logging.info('Cleared collection: %s', collection.name)
+        return True
+    except PyMongoError as error:
+        logging.error('Error clearing collection: %s', error)
+        return False
