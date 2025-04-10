@@ -58,7 +58,8 @@ def create_account():
         return '', 400
     logging.info("create_account: email address is unique")
 
-    hashed_pw = bcrypt.hashpw(pw, bcrypt.gensalt(log_rounds=12))
+    #added UTF-8 encoding
+    hashed_pw = bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt(log_rounds=12))
 
     success, result = create_user(table, email, hashed_pw, school) 
     if success == True:
@@ -83,14 +84,15 @@ def login():
 
     success, user = get_user_by_email(email, table)
     if success == False:
-        logging.info("login: error fetching user")
+        logging.info(f"login: error fetching user {email}.")
         return '', 500
     elif user == None:
         logging.info("login: user not found")
         return '', 400
 
-    stored_hash = user["pwHash"]
-    check_hash = bcrypt.hashpw(pw, stored_hash)
+    #ADDED PASHWORD ENCODING
+    stored_hash = user["pwHash"].encode('utf-8')
+    check_hash = bcrypt.hashpw(pw.encode('utf-8'), stored_hash)
     if stored_hash == check_hash: # check if passwords match. do this because bcrypt.checkpw is not working... temporary i hope
         logging.info("login: password matches")
         return jsonify({"session_token": generate_jwt(user["email"])}), 200
