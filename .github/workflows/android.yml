@@ -1,11 +1,11 @@
 name: Android Build
-# on:
-  # push:
-  #   branches:
-  #     - 'integration/dev'
-  # pull_request:
-  #   branches:
-  #     - 'integration/dev'
+on:
+  push:
+    branches:
+      - 'release/**'
+  pull_request:
+    branches:
+      - 'release/**'
 jobs:
   android-build:
     runs-on: ubuntu-latest
