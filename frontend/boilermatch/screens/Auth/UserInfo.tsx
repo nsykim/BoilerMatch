@@ -18,8 +18,9 @@ const UserInfo = () => {
     last_name: '',
     age: '',
     bio: '',
-    hobbies: '',
+    hobbies: [] as string[],
   });
+  const [hobbyInput, setHobbyInput] = useState('');
   const { email, token } = useAuth();
 
   // ✅ These lines must be inside the component
@@ -30,6 +31,12 @@ const UserInfo = () => {
   // Check if user came from registration
   const fromRegister = route.params?.fromRegister ?? false;
 
+  const addHobby = () => {
+    if (hobbyInput.trim()) {
+      setUserInfo(prev => ({ ...prev, hobbies: [...prev.hobbies, hobbyInput.trim()] }));
+      setHobbyInput('');
+    }
+  };
 
   const handleChange = (field: string, value: string) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
@@ -56,25 +63,40 @@ const UserInfo = () => {
     }
   };
   
-  
-  
-    
-
-  
   return (
     <View style={styles.container}>
       <Text style={styles.header}>User Information</Text>
       <ScrollView style={styles.scrollContainer}>
-        {Object.keys(userInfo).map((key) => (
+        {['first_name', 'last_name', 'age', 'bio'].map((key) => (
           <TextInput
             key={key}
             style={styles.input}
             placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
             placeholderTextColor={darkTheme.text}
             onChangeText={(text) => handleChange(key, text)}
-            value={userInfo[key as keyof typeof userInfo]}
+            value={userInfo[key as keyof typeof userInfo] as string}
           />
         ))}
+
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            placeholder="Add a hobby"
+            placeholderTextColor={darkTheme.text}
+            onChangeText={setHobbyInput}
+            value={hobbyInput}
+          />
+        <TouchableOpacity onPress={addHobby}>
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>+</Text>
+        </TouchableOpacity>
+
+        {userInfo.hobbies.length > 0 && (
+          <View style={{ marginBottom: 15 }}>
+            {userInfo.hobbies.map((hobby, index) => (
+              <Text key={index} style={{ color: darkTheme.text, marginLeft: 5 }}>• {hobby}</Text>
+            ))}
+          </View>
+        )}
+
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Save</Text>
         </TouchableOpacity>
