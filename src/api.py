@@ -20,9 +20,20 @@ CORS(app, resources={
     }
 })
 
+### 
 @app.route('/delete_account/<email>', methods=['DELETE'])
 def delete_account(email):
-    # TEMPORARY FUNCTION FOR TESTING PURPOSES
+    """
+    TEMPORARY FUNCTION FOR TESTING PURPOSES
+    Deletes the account with the given email address from the MongoDB.
+
+    Requires:
+    - email: The email address of the account to delete in the URL.
+
+    Return Codes:
+    - 200: Account deleted successfully.
+    - 500: Error deleting account.
+    """
     table = accounts_db["accounts"]
     success = remove_user(email, table)
     if success == True:
@@ -32,6 +43,19 @@ def delete_account(email):
 
 @app.route('/create_account', methods=['POST'])
 def create_account():
+    """
+    Creates a new account in the MongoDB.
+
+    Requires:
+    - email: The email address of the account to create in the body.
+    - password: The password of the account to create in the body.
+    - school: The school of the account to create in the body.
+
+    Return Codes:
+    - 200: Account created successfully.
+    - 400: Malformed request or email already registered.
+    - 500: Error creating account.
+    """
     body = request.json
     email = body.get('email')
     pw = body.get('password')
@@ -52,7 +76,7 @@ def create_account():
 
     table = accounts_db["accounts"]
 
-    success, user = get_user_by_email(email, table) # returns None if user does not exist
+    success, user = get_user_by_email(email, table)
     if user != None:
         logging.info("create_account: email is already registered in the database")
         return '', 400
@@ -70,6 +94,18 @@ def create_account():
 
 @app.route('/login', methods=['POST'])
 def login():
+    """
+    Logs in a user and returns a session token to allow access to other app functionality.
+
+    Requires:
+    - email: The email address of the account to log in in the body.
+    - password: The password of the account to log in in the body.
+
+    Return Codes:
+    - 200: Login successful, returns session token.
+    - 400: Malformed request or invalid email/password.
+    - 500: Error logging in.
+    """
     body = request.json
     email = body.get('email')
     pw = body.get('password')
@@ -91,7 +127,7 @@ def login():
 
     stored_hash = user["pwHash"]
     check_hash = bcrypt.hashpw(pw, stored_hash)
-    if stored_hash == check_hash: # check if passwords match. do this because bcrypt.checkpw is not working... temporary i hope
+    if stored_hash == check_hash:
         logging.info("login: password matches")
         return jsonify({"session_token": generate_jwt(user["email"])}), 200
     else: 
@@ -103,14 +139,27 @@ def autocomplete_colleges():
     query = request.args.get('q', '').strip()
     result, status_code = fetch_colleges(query)
     
-    if isinstance(result, dict): # Error case
+    if isinstance(result, dict):
         return jsonify(result), status_code
     
     return jsonify({"colleges": result}), status_code
 
 @app.route('/get_roommate_recommendations', methods=['POST'])
 def get_roommate_recommendations():
-    # Get required fields
+    """
+    Gets roommate recommendations for a user based on their preferences and school.
+
+    Requires:
+    - email: The email address of the account to get recommendations for in the body.
+    - session_token: The session token of the user in the headers.
+
+    Return Codes:
+    - 200: Recommendations successfully retrieved.
+    - 400: Malformed request or invalid session token.
+    - 401: Unauthorized access.
+    - 404: User not found.
+    - 500: Error retrieving recommendations.
+    """
     body = request.json
     email = body.get('email')
     session_token = request.headers['Authorization']
@@ -155,6 +204,20 @@ def get_roommate_recommendations():
 
 @app.route('/set_preferences', methods=['POST'])
 def set_preferences():
+    """
+    Sets the preferences for a user in the MongoDB.
+
+    Requires:
+    - email: The email address of the account to set preferences for in the body.
+    - session_token: The session token of the user in the headers.
+    - preferences: The preferences to set for the user in the body.
+
+    Return Codes:
+    - 200: Preferences successfully updated.
+    - 400: Malformed request or missing fields.
+    - 401: Unauthorized access.
+    - 500: Error updating preferences.
+    """
     body = request.json
     email = body.get('email')
     session_token = request.headers['Authorization']
@@ -188,6 +251,20 @@ def set_preferences():
 
 @app.route('/set_user_info', methods=['POST'])
 def set_user_info():
+    """
+    Sets the user info for a user in the MongoDB.
+    
+    Requires:
+    - email: The email address of the account to set user info for in the body.
+    - session_token: The session token of the user in the headers.
+    - user_info: The user info to set for the user in the body.
+    
+    Return Codes:
+    - 200: User info successfully updated.
+    - 400: Malformed request or missing fields.
+    - 401: Unauthorized access.
+    - 500: Error updating user info.
+    """
     body = request.json
     email = body.get('email')
     session_token = request.headers.get('Authorization')
@@ -217,8 +294,22 @@ def set_user_info():
     else:
         logging.error("set_user_info: user info could not be updated")
         return session_token, 500
+
 @app.route('/get_user_info', methods=['POST'])
 def get_user_info():
+    """
+    Gets the user info for a user in the MongoDB.
+    
+    Requires:
+    - email: The email address of the account to get user info for in the body.
+    - session_token: The session token of the user in the headers.
+    
+    Return Codes:
+    - 200: User info successfully retrieved.
+    - 400: Malformed request or missing fields.
+    - 401: Unauthorized access.
+    - 500: Error retrieving user info.
+    """
     body = request.json
     email = body.get('email')
     session_token = request.headers['Authorization']
@@ -246,6 +337,21 @@ def get_user_info():
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
+    """
+    Sends a message to a chat via Firebase Firestore and updates metadata in the MongoDB.
+    
+    Requires:
+    - chat_id: The ID of the chat to send the message to in the headers.
+    - session_token: The session token of the user in the headers.
+    - email: The email address of the user sending the message in the body.
+    - content: The content of the message to send in the body.
+
+    Return Codes:
+    - 200: Message sent successfully.
+    - 400: Malformed request or missing fields.
+    - 401: Unauthorized access.
+    - 500: Error sending message.
+    """
     body = request.json
     chat_id = request.headers['chat_id']
     content = body.get('content')
@@ -272,6 +378,20 @@ def send_message():
     
 @app.route('/open_chat', methods=['POST'])
 def open_chat():
+    """
+    Opens a chat and retrieves the chat history from Firebase Firestore.
+    
+    Requires:
+    - chat_id: The ID of the chat to open in the headers.
+    - session_token: The session token of the user in the headers.
+    - email: The email address of the user opening the chat in the body.
+    
+    Return Codes:
+    - 200: Chat history retrieved successfully.
+    - 400: Malformed request or missing fields.
+    - 401: Unauthorized access.
+    - 500: Error retrieving chat history.
+    """
     body = request.json
     chat_id = request.headers['chat_id']
     session_token = request.headers['Authorization']
@@ -294,11 +414,23 @@ def open_chat():
         return '', 500
     logging.info("open_chat: chat history fetched successfully")
 
-
     return jsonify(chat_history), 200
 
 @app.route('/chats_page', methods=['POST'])
 def chats_page():
+    """
+    Retrieves the chats for a user and sorts them by last message time.
+    
+    Requires:
+    - email: The email address of the user to retrieve chats for in the body.
+    - session_token: The session token of the user in the headers.
+    
+    Return Codes:
+    - 200: Chats retrieved and sorted successfully.
+    - 400: Malformed request or missing fields.
+    - 401: Unauthorized access.
+    - 500: Error retrieving or sorting chats.
+    """
     body = request.json
     email = body.get('email')
     session_token = request.headers['Authorization']
@@ -324,11 +456,26 @@ def chats_page():
         return None, 200
     else:
         logging.info("chats_page: chats sorted successfully")
-        return jsonify(sorted_chats), 200 # WILL NEED TO UPDATE TO RETURN OTHER USER NAME NOT EMAIL
+        return jsonify(sorted_chats), 200
 
 
 @app.route('/like', methods=['POST'])
 def like():
+    """
+    Likes a user and creates a chat if both users have liked each other.
+    
+    Requires:
+    - email: The email address of the user liking another user in the body.
+    - other: The email address of the user to be liked in the body.
+    - session_token: The session token of the user in the headers.
+
+    Return Codes:
+    - 200: Like added successfully or chat created.
+    - 400: Malformed request or missing fields.
+    - 401: Unauthorized access.
+    - 403: Users have already been matched.
+    - 500: Error adding like or creating chat. 
+    """
     body = request.json
     email = body.get('email')
     other = body.get('other')    
@@ -362,18 +509,18 @@ def like():
         logging.info("match: users matched")
         return jsonify({"chat_id" : id}), 200
 
-@app.route('/delete_chatlog', methods=['DELETE'])
-def delete_chatlog():
-    chat_id = request.headers['chat_id']
-    
-    if delete_chat(chat_id):
-        return '', 200
-    else:
-        return '', 500
-
 @app.route('/clear_db', methods=['DELETE'])
 def clear_db():
-    # TEMPORARY FUNCTION FOR TESTING PURPOSES
+    """
+    TEMPORARY FUNCTION FOR TESTING PURPOSES
+    Clears the MongoDB database by deleting all accounts and chats.
+    
+    Return Codes:
+    - 200: Database cleared successfully.
+    - 500: Error clearing database.
+    """
+
+
     try:
         success = clear_mongo(accounts_db["accounts"])
         if success == False:
