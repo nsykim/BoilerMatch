@@ -20,3 +20,8 @@ newman-report.xml
 # PACKAGE LOCK
 package-lock.json
 node_modules/
+.expo/
+
+# Ignore Android build files
+android/
+**/android/

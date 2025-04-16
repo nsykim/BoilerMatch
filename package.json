@@ -14,5 +14,8 @@
   "license": "ISC",
   "devDependencies": {
     "newman": "^6.2.1"
+  },
+  "dependencies": {
+    "expo-image-picker": "~14.7.1"
   }
 }
