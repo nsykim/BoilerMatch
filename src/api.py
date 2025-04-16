@@ -58,8 +58,7 @@ def create_account():
         return '', 400
     logging.info("create_account: email address is unique")
 
-    #added UTF-8 encoding
-    hashed_pw = bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt(log_rounds=12))
+    hashed_pw = bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt(rounds=12))
 
     success, result = create_user(table, email, hashed_pw, school) 
     if success == True:
@@ -84,15 +83,14 @@ def login():
 
     success, user = get_user_by_email(email, table)
     if success == False:
-        logging.info(f"login: error fetching user {email}.")
+        logging.info("login: error fetching user")
         return '', 500
     elif user == None:
         logging.info("login: user not found")
         return '', 400
 
-    #ADDED PASHWORD ENCODING
-    stored_hash = user["pwHash"].encode('utf-8')
-    check_hash = bcrypt.hashpw(pw.encode('utf-8'), stored_hash)
+    stored_hash = user["pwHash"]
+    check_hash = bcrypt.hashpw(pw.encode("utf-8"), stored_hash)
     if stored_hash == check_hash: # check if passwords match. do this because bcrypt.checkpw is not working... temporary i hope
         logging.info("login: password matches")
         return jsonify({"session_token": generate_jwt(user["email"])}), 200
@@ -373,6 +371,26 @@ def delete_chatlog():
     else:
         return '', 500
 
+@app.route('/clear_db', methods=['DELETE'])
+def clear_db():
+    # TEMPORARY FUNCTION FOR TESTING PURPOSES
+    try:
+        success = clear_mongo(accounts_db["accounts"])
+        if success == False:
+            logging.error("Error clearing accounts database")
+            return '', 500
+        success = delete_chats_collection() 
+        if success == False:
+            logging.error("Error clearing chats database")
+            return '', 500  
+    except Exception as e:
+        logging.error("Error clearing database: %s", e)
+        return '', 500
+
+    if success == True:
+        return '', 200
+    else:
+        return '', 500
 
 accounts_db = None
 if __name__ == '__main__':

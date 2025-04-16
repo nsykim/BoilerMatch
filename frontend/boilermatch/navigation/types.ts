@@ -4,6 +4,6 @@ export type RootStackParamList = {
   MainTabNavigator: undefined;
   Chat: undefined;
   Settings: undefined;
-  UserInfo: { fromRegister?: boolean };
+  UserInfo: { is_new_user ?: boolean };
   UserInfoRegister: undefined; // ✅ Add this line
 };

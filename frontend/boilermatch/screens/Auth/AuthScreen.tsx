@@ -21,7 +21,7 @@ const AuthScreen = () => {
   const [password, setPassword] = useState('')
   const [school, setSchool] = useState('')
   const [loading, setLoading] = useState(false)
-  const { setEmail, setToken } = useAuth()
+  const { setEmail, setToken, setIsNewUser } = useAuth()
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -45,22 +45,24 @@ const AuthScreen = () => {
     try {
       await apiPost("/create_account", { email: inputEmail, password, school });
   
-      // ✅ Log in after successful registration
+      // Log in after successful registration #NEED THIS TO USE SAME SETPREFERENCES SCREEN AND SUCH
       const { session_token: token } = await apiPost("/login", { email: inputEmail, password });
   
+      // ✅ Correctly store new user flag
+      //await AsyncStorage.setItem("is_new_user", "true");
+      // ✅ Let AsyncStorage finish writing before rerender
+      //await new Promise(res => setTimeout(res, 50));
+      // ✅ Debug log to confirm flag is set
+      //const checkNewUser = await AsyncStorage.getItem("is_new_user");
+      console.log("🟡 [DEBUG] AFTER REGISTERING: checkNewUser, is_new_user =", setIsNewUser);  
+
       setEmail(inputEmail);
       setToken(token);
+      setIsNewUser(true); // ✅ Use context instead of AsyncStorage
       await AsyncStorage.setItem("email", inputEmail);
       await AsyncStorage.setItem("session_token", token);
-  
-      // ✅ Correctly store new user flag
-      await AsyncStorage.setItem("is_new_user", "true");
-  
-      // ✅ Debug log to confirm flag is set
-      const checkNewUser = await AsyncStorage.getItem("is_new_user");
-      console.log("🟡 [DEBUG] AFTER REGISTERING: is_new_user =", checkNewUser);
-  
-      navigation.replace("UserInfo", {}); // ✅ Ensure correct transition
+
+      navigation.replace("UserInfo", {is_new_user: true}); // ✅ Ensure correct transition
     } catch (error: any) {
       Alert.alert("Error", error?.message || "Something went wrong");
     } finally {
@@ -85,6 +87,7 @@ const AuthScreen = () => {
 
       setEmail(inputEmail);
       setToken(token);
+      setIsNewUser(false); // ✅ Mark not a new user
       await AsyncStorage.setItem("email", inputEmail);
       await AsyncStorage.setItem("session_token", token);
 
@@ -92,11 +95,10 @@ const AuthScreen = () => {
       Alert.alert("Success", "Logged in!");
 
       // ✅ Correctly store new user flag
-      await AsyncStorage.setItem("is_new_user", "false");
-  
+      //await AsyncStorage.setItem("is_new_user", "false");
       // ✅ Debug log to confirm flag is set
-      const checkNewUser = await AsyncStorage.getItem("is_new_user");
-      console.log("🟡 [DEBUG] AFTER LOGIN: is_new_user =", checkNewUser);
+      //const checkNewUser = await AsyncStorage.getItem("is_new_user");
+      console.log("🟡 [DEBUG] AFTER LOGIN: is_new_user =", setIsNewUser);
 
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Something went wrong');

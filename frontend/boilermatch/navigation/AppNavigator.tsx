@@ -16,9 +16,9 @@ import type { RootStackParamList } from "@/navigation/types";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
-  const { token, setToken } = useAuth();
+  const { token, setToken, isNewUser, setIsNewUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [isNewUser, setIsNewUser] = useState(false);
+  //const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
   const checkLoginStatus = async () => {
@@ -29,11 +29,11 @@ export default function AppNavigator() {
       if (storedToken && !isTokenExpired(storedToken)) {
         setToken(storedToken);
 
-        const newUserFlag = await AsyncStorage.getItem("is_new_user");
-        console.log("🟢 Debug: Retrieved is_new_user BEFORE setting state:", newUserFlag);
+        //const newUserFlag = await AsyncStorage.getItem("is_new_user");
+        //console.log("🟢 Debug: Retrieved is_new_user BEFORE setting state:", newUserFlag);
 
         // ✅ Ensure correct boolean conversion
-        setIsNewUser(newUserFlag === "true");
+        //setIsNewUser(newUserFlag === "true");
       } else {
         await AsyncStorage.removeItem("session_token");
         setToken(null);
@@ -68,7 +68,7 @@ export default function AppNavigator() {
           isNewUser ? (
             // ✅ New users must go through onboarding
             <>
-              <Stack.Screen name="UserInfoRegister" component={UserInfoRegister} />
+              <Stack.Screen name="UserInfo" component={UserInfo} />
               <Stack.Screen name="Preferences" component={PreferencesScreen} />
               <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
             </>

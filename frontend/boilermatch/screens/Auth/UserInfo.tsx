@@ -25,7 +25,7 @@ const UserInfo = () => {
     bio: '',
     hobbies: '',
   });
-  const { email, token } = useAuth();
+  const { email, token, isNewUser, setIsNewUser } = useAuth();
 
   //for image picking
   const [image, setImage] = useState<string | null>(null);
@@ -38,7 +38,7 @@ const UserInfo = () => {
 
 
   // Check if user came from registration
-  const fromRegister = route.params?.fromRegister ?? false;
+  const fromRegister = route.params?.is_new_user ?? false;
 
 
   const handleChange = (field: string, value: string) => {
@@ -62,8 +62,15 @@ const UserInfo = () => {
     } catch (error: any) {
       console.error("API Error:", error);
     } finally {
-      // ✅ Only store the flag, but DO NOT navigate
-      await AsyncStorage.setItem("is_new_user", "false");
+      // 🟢 If it's a new user, continue onboarding to preferences
+      if (isNewUser) {
+        setIsNewUser(false);
+        await AsyncStorage.setItem("is_new_user", "false");
+        navigation.replace("Preferences");
+      } else {
+        // 🔵 Otherwise, just route to main tabs (e.g., after editing user info)
+        navigation.replace("MainTabNavigator");
+      }
       console.log("AFTER SAVING: is_new_user =", await AsyncStorage.getItem("is_new_user"));
     }
   };
