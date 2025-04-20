@@ -78,7 +78,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"password\": \"sdkfdsfhs\"\r\n}",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"password\": \"sdkfdsfhs\",\r\n\t\"school\": \"Purdue\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -124,7 +124,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"password\": \"noahskim\"\r\n\r\n}",
+					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"password\": \"noahskim\",\r\n\t\"school\": \"Purdue\"\r\n\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -165,14 +165,11 @@
 					}
 				}
 			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
 				"auth": {
 					"type": "noauth"
 				},
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
@@ -217,14 +214,11 @@
 					}
 				}
 			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
 				"auth": {
 					"type": "noauth"
 				},
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
@@ -269,14 +263,11 @@
 					}
 				}
 			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
 				"auth": {
 					"type": "noauth"
 				},
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
