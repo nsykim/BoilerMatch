@@ -8,6 +8,10 @@ import time
 import hashlib
 import time
 
+#import base64
+from bson.binary import Binary
+
+
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
@@ -141,6 +145,14 @@ def update_preferences(user, preferences, collection, email):
     
 def update_user_info(user, user_info, collection, email):
     try:
+         # If an image is included and it's a base64 string, convert it to Binary
+        if "profile_image" in user_info and isinstance(user_info["profile_image"], bytes):
+            user_info["profile_image"] = Binary(user_info["profile_image"])
+
+        logging.info(f"profile_image present: {'profile_image' in user_info}")
+        logging.info(f"profile_image type: {type(user_info.get('profile_image'))}")
+
+
         collection.update_one({"email": email}, {"$set": {"userInfo": user_info}})
         user["userInfo"] = user_info
         return True
