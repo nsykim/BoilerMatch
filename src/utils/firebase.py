@@ -21,9 +21,21 @@ if not firebase_admin._apps: # only perform this if firebase has not been initia
 db = firestore.client()
 
 def fb_send_message(chat_id, sender, content, collection):
+    """
+    Send a message to the firebase database and update the chat in the mongo database.
+    
+    Args:
+        chat_id (str): The ID of the chat.
+        sender (str): The sender of the message.
+        content (str): The content of the message.
+        collection (str): The collection name in the mongo database.
+    
+    Returns:
+        bool: True if the message was sent and chat updated successfully, False otherwise.
+    """
     timestamp = int(time.time())
     logging.info("Sending message at timestamp: %s", timestamp)
-    try:
+    try: # try to send the message to firebase
         message_ref = db.collection("chats").document(chat_id).collection("messages").document()
         message_ref.set({
             "sender": sender,
@@ -34,8 +46,7 @@ def fb_send_message(chat_id, sender, content, collection):
     except Exception as e:
         logging.error("Error sending message to firebase: %s", e)
         return False
-    try:
-        logging.info("ALLUAHACKBAR %s", chat_id)
+    try: # if the message was sent to firebase, update the mongo metadata
         success = update_chat(chat_id, collection, timestamp)   
         if success == False:
             logging.error("Error updating chat in mongo database")
@@ -47,6 +58,15 @@ def fb_send_message(chat_id, sender, content, collection):
         return False
 
 def fetch_chat_history(chat_id):
+    """
+    Fetch the chat history from the firebase database.
+    
+    Args:
+        chat_id (str): The ID of the chat.
+        
+    Returns:
+        list: A list of messages in the chat.
+    """
     try:
         messages_ref = db.collection("chats").document(chat_id).collection("messages")
         messages = messages_ref.order_by("timestamp").stream()
@@ -58,6 +78,15 @@ def fetch_chat_history(chat_id):
         return None
 
 def delete_chat(chat_id):
+    """
+    Delete a chat from the firebase database.
+    
+    Args:
+        chat_id (str): The ID of the chat.
+        
+    Returns:
+        bool: True if the chat was deleted successfully, False otherwise.
+    """
     try:
         doc_ref = db.collection("chats").document(chat_id)
         doc = doc_ref.get()
@@ -75,6 +104,12 @@ def delete_chat(chat_id):
         return False
 
 def delete_chats_collection():
+    """
+    Delete all chats from the firebase database.
+    
+    Returns:
+        bool: True if all chats were deleted successfully, False otherwise.
+    """
     chats_ref = db.collection("chats")
     try: 
         chats_docs = list(chats_ref.stream())
@@ -90,6 +125,16 @@ def delete_chats_collection():
         return False
 
 def delete_messages_subcollection(messages_ref, batch_size = 10):
+    """
+    Delete messages from a subcollection in batches -- required because deleting firebase collections does not delete subsollections as well. 
+    
+    Args:
+        messages_ref (firestore.CollectionReference): The reference to the messages subcollection.
+        batch_size (int): The number of messages to delete in each batch.
+        
+    Returns:
+        bool: True if the messages were deleted successfully, False otherwise.
+    """
     try:
         docs = messages_ref.limit(batch_size).stream()
         deleted_count = 0

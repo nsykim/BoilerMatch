@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "8e5425a7-87a4-4021-bb85-2591065b0b6e",
+		"_postman_id": "b6f93674-31e7-4b78-a650-acaab00eacfa",
 		"name": "BoilerMatch",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "42236287"
+		"_exporter_id": "40185812"
 	},
 	"item": [
 		{
@@ -78,7 +78,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"school\": \"Purdue University\", \r\n    \"password\": \"sdkfdsfhs\"\r\n}",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"password\": \"sdkfdsfhs\",\r\n\t\"school\": \"Purdue\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -124,7 +124,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"school\": \"Purdue University\", \r\n    \"password\": \"noahskim\"\r\n\r\n}",
+					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"password\": \"noahskim\",\r\n\t\"school\": \"Purdue\"\r\n\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -901,6 +901,108 @@
 					"port": "3020",
 					"path": [
 						"delete_chatlog"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Autocomplete fail (no query)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Error message mentions query parameter\", function () {",
+							"    pm.expect(pm.response.text()).to.include('Query parameter');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3020/autocomplete_colleges",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"autocomplete_colleges"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "autocomplete success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has colleges array\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.have.property('colleges');",
+							"    pm.expect(responseData.colleges).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Colleges match search query\", function () {",
+							"    const responseData = pm.response.json();",
+							"    const query = pm.request.url.query.get('q').toLowerCase();",
+							"    responseData.colleges.forEach(function(college) {",
+							"        pm.expect(college.toLowerCase()).to.include(query);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3020/autocomplete_colleges?q=purdue",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"autocomplete_colleges"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "purdue"
+						}
 					]
 				}
 			},

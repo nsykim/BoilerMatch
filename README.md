@@ -14,18 +14,9 @@ BoilerMatch/\
 ## Setup Instructions
 
 ### Backend
-1. Navigate to the backend directory:
-   `cd src`
+- Start the API:
+   `run build:be` or `python3 src/api.py`
 
-2. (Optional) Create and activate a virtual environment:
-   `python -m venv venv`  
-   source venv/bin/activate  # or venv\Scripts\activate on Windows
-
-3. Install dependencies:
-   `pip install -r requirements.txt`
-
-4. Start the API:
-   `python api.py`
 
 The API will be hosted on your computer's local IPv4 address (e.g., http://192.168.x.x:3020).  
 You must use this address instead of localhost so the mobile app can connect from another device on the same network.
@@ -55,6 +46,10 @@ Make sure your mobile device is connected to the same Wi-Fi network as the compu
 ## Running Tests
 - All integration and unit tests are located in the `tests/` directory.
 - Tests are automatically run on all `integration/*` branches via GitHub Actions CI.
+- Tests can be run manually using one of the following three commands:
+1. `run test` to run backend and API tests.
+2. `run test:backend` to run backend tests only and generate a coverage report
+3. `run test:api` to run the API tests and generate an Postman API report. 
 
 ---
 
