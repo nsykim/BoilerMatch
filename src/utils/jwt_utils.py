@@ -10,18 +10,35 @@ load_dotenv()
 SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = "HS256"
 
-# Generates a JWT given user data
 def generate_jwt(email: str, expires_in: int = 86400) -> str:
+    """
+    Generate a JWT token with the given email and expiration time.
+    
+    Args:
+        email (str): The email to include in the token.
+        expires_in (int): The expiration time in seconds. Default is 86400 seconds (1 day).
+    
+    Returns:
+        str: The generated JWT token.
+    """
     now = datetime.datetime.now(datetime.timezone.utc)
     payload = {
         "email": email,
-        # "role": role 
         "iat": now.timestamp(),  # token issue date
         "exp": (now + datetime.timedelta(seconds=expires_in)).timestamp()  # token expiration date
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 def validate_jwt(token: str) -> Optional[Dict]:
+    """
+    Validate the JWT token and return the payload if valid.
+    
+    Args:
+        token (str): The JWT token to validate.
+        
+    Returns:
+        Optional[Dict]: The decoded payload if the token is valid, otherwise None.
+    """
     if token.startswith("Bearer "):
         token = token[len("Bearer "):]
     

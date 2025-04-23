@@ -14,6 +14,7 @@ jobs:
     
     env:
       FIREBASE_CREDENTIALS_B64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }}
+      COLLEGE_API_KEY: ${{ secrets.COLLEGE_API_KEY}}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       USER_NAME: ${{ secrets.USER_NAME }}
       PW: ${{ secrets.PW }} 

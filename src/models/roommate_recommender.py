@@ -4,11 +4,27 @@ import logging
 from typing import List, Tuple, Dict
 
 class RoommateRecommender:
+    """
+    A class to recommend potential roommates based on user preferences and feature vectors.
+    
+    Attributes:
+        n_neighbors (int): The number of neighbors to consider for recommendations.
+        model (NearestNeighbors): The NearestNeighbors model for finding similar users.
+    """
     def __init__(self, n_neighbors: int = 20):
         self.n_neighbors = min(n_neighbors, 100)
         self.model = NearestNeighbors(n_neighbors=self.n_neighbors, metric='euclidean')
         
     def _extract_feature_vector(self, user: Dict) -> List[float]:
+        """
+        Extracts a feature vector from the user data, excluding certain keys.
+        
+        Args:
+            user (Dict): The user data containing preferences.
+        
+        Returns:
+            List[float]: A list of feature values.
+        """
         preferences = user.get("preferences", {})
         excluded_keys = {"doesSmoke", "hasPets", "gender"}  # Exclude these from feature vector
         return [
@@ -17,6 +33,16 @@ class RoommateRecommender:
         ]
     
     def _filter_by_preferences(self, target_user: Dict, potential_matches: List[Dict]) -> List[Dict]:
+        """
+        Filters potential matches based on the target user's preferences.
+        
+        Args:
+            target_user (Dict): The target user data.
+            potential_matches (List[Dict]): A list of potential matches.
+            
+        Returns:
+            List[Dict]: A list of filtered potential matches.
+        """
         target_prefs = target_user.get("preferences", {})
         filtered_matches = []
         
@@ -73,6 +99,15 @@ class RoommateRecommender:
         return filtered_matches
     
     def _calculate_similarity_score(self, distance: float) -> float:
+        """
+        Calculate the similarity score based on the distance from the target user.
+        
+        Args:
+            distance (float): The distance to the nearest neighbor.
+            
+        Returns:
+            float: The similarity score as a percentage.
+        """
         max_distance = np.sqrt(7 * 25)  # Adjusted for 7 features instead of 10
         logging.debug(f"Distance: {distance:.2f}, Max distance: {max_distance:.2f}")
         similarity = max(0, (max_distance - distance) / max_distance)
@@ -88,6 +123,18 @@ class RoommateRecommender:
         if not school_users:
             logging.warning("No potential matches found in the school")
             return []
+
+        """
+        Generate roommate recommendations based on the target user's preferences and feature vectors.
+        
+        Args:
+            target_user (Dict): The target user data.
+            school_users (List[Dict]): A list of potential matches from the same school.
+            max_recommendations (int): The maximum number of recommendations to return.
+        
+        Returns:
+            List[Tuple[Dict, float]]: A list of tuples containing recommended users and their similarity scores.
+        """
         
         target_vector = np.array(self._extract_feature_vector(target_user)).reshape(1, -1)
         filtered_users = self._filter_by_preferences(target_user, school_users)
@@ -123,6 +170,15 @@ class RoommateRecommender:
 
     @staticmethod
     def format_recommendations(recommendations: List[Tuple[Dict, float]]) -> List[Dict]:
+        """
+            Format the recommendations into a more readable structure.
+            
+            Args:
+                recommendations (List[Tuple[Dict, float]]): The list of recommendations.
+                
+            Returns:
+                List[Dict]: A list of formatted recommendations.
+        """
         return [{
             "email": user["email"],
             "school": user["school"],

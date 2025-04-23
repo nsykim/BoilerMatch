@@ -40,10 +40,18 @@ empty_preferences = {
 }
 
 def connect_to_mongodb(database):
+    """
+    Connect to MongoDB using the connection string from environment variables.
+
+    Args:
+        database (str): The name of the database to connect to.
+
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure, and the database object or error.
+    """
     try:
         logging.info("Connecting to MongoDB")
         mongo_uri = f"mongodb+srv://{os.getenv('USER_NAME')}:{os.getenv('PW')}@boilermatch.xx9ot.mongodb.net/{database}?retryWrites=true&w=majority&appName=BoilerMatch"
-        # logging.info("Mongo URI: %s", mongo_uri)
         client = MongoClient(mongo_uri)
         db = client[database]
         logging.info('Connected to MongoDB')
@@ -53,6 +61,20 @@ def connect_to_mongodb(database):
         return False, error
 
 def create_user(collection, email, pw_hash, school, preferences=empty_preferences, user_info=None):
+    """
+    Create a new user in the MongoDB collection.
+    
+    Args:
+        collection: The MongoDB collection to insert the user into.
+        email (str): The email of the user.
+        pw_hash (str): The hashed password of the user.
+        school (str): The school of the user.
+        preferences (dict, optional): User preferences. Defaults to empty_preferences.
+        user_info (dict, optional): Additional user information. Defaults to None.
+        
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure, and the email or error.
+    """
     new_user = {
         "email": email,
         "pwHash": pw_hash,
@@ -72,6 +94,16 @@ def create_user(collection, email, pw_hash, school, preferences=empty_preference
         return False, error
 
 def remove_user(email, collection):
+    """
+    Remove a user from the MongoDB collection by email.
+    
+    Args:
+        email (str): The email of the user to remove.
+        collection: The MongoDB collection to remove the user from.
+        
+    Returns:
+        bool: True if the user was removed successfully, False otherwise.
+    """
     try:
         result = collection.delete_one({"email": email})
         logging.info('User removed: %s', email)
@@ -81,6 +113,15 @@ def remove_user(email, collection):
         return False
     
 def remove_all_users(collection):
+    """
+    Remove all users from the MongoDB collection.
+    
+    Args:
+        collection: The MongoDB collection to remove users from.
+        
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure, and the number of deleted users or error.
+    """
     try:
         result = collection.delete_many({})
         deleted_count = result.deleted_count
@@ -91,6 +132,16 @@ def remove_all_users(collection):
         return False, error
 
 def get_user_by_email(email, collection):
+    """
+    Fetch a user from the MongoDB collection by email.
+    
+    Args:
+        email (str): The email of the user to fetch.
+        collection: The MongoDB collection to search in.
+        
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure, and the user document or error.
+    """
     try:
         user = collection.find_one({"email": email})
         if not user:
@@ -102,8 +153,18 @@ def get_user_by_email(email, collection):
         logging.error('Error fetching user: %s', error)
         return False, error
 
-# FOR KNN
 def get_users_by_school(school, collection, limit=100):
+    """
+    Fetch a random sample of users from the MongoDB collection by school.
+    
+    Args:
+        school (str): The school to filter users by.
+        collection: The MongoDB collection to search in.
+        limit (int): The maximum number of users to return. Defaults to 100.
+        
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure, and the list of users or error.
+    """
     try:
         # Using aggregation pipeline to first match by school then get random sample
         pipeline = [
@@ -135,6 +196,18 @@ def get_users_by_school(school, collection, limit=100):
         return False, error
 
 def update_preferences(user, preferences, collection, email):
+    """
+    Update user preferences in the MongoDB collection.
+    
+    Args:
+        user: The user document to update.
+        preferences (dict): The new preferences to set.
+        collection: The MongoDB collection to update.
+        email (str): The email of the user to update.
+        
+    Returns:
+        bool: True if the preferences were updated successfully, False otherwise.
+    """
     try:
         collection.update_one({"email": email}, {"$set": {"preferences": preferences}}) 
         user["preferences"] = preferences
@@ -162,6 +235,17 @@ def update_user_info(user, user_info, collection, email):
     
 
 def update_chat(chat_id, collection, timestamp):
+    """
+    Update the lastUpdated field of a chat in the MongoDB collection.
+    
+    Args:
+        chat_id (str): The chat ID to update.
+        collection: The MongoDB collection to update.
+        timestamp (int): The new timestamp to set.
+        
+    Returns:
+        bool: True if the chat was updated successfully, False otherwise.
+    """
     try:
         result = collection.update_many(
             {"chats.chat_id": chat_id},
@@ -175,6 +259,16 @@ def update_chat(chat_id, collection, timestamp):
         return False
 
 def sort_chats(collection, email):
+    """
+    Sort chats for a user by lastUpdated timestamp.
+    
+    Args:
+        collection: The MongoDB collection to search in.
+        email (str): The email of the user whose chats to sort.
+        
+    Returns:
+        list: A sorted list of chats for the user, or None if an error occurred.
+    """
     try:
         user = collection.find_one({"email": email}, {"chats": {"$slice": [0, 100]}})  # Limit results
         if not user or "chats" not in user:
@@ -189,6 +283,17 @@ def sort_chats(collection, email):
         return None
 
 def add_like(collection, email1, email2):
+    """
+    Add a like from one user to another in the MongoDB collection.
+    
+    Args:
+        collection: The MongoDB collection to update.
+        email1 (str): The email of the user who is liking.
+        email2 (str): The email of the user who is being liked.
+        
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure, and the result or error.
+    """
     try:
         user1 = collection.find_one({"email": email1})
         user2 = collection.find_one({"email": email2})
@@ -211,6 +316,17 @@ def add_like(collection, email1, email2):
         return False, error
 
 def match_users(collection, email1, email2):
+    """
+    Match two users by creating a chat ID and updating their chat lists.
+    
+    Args:
+        collection: The MongoDB collection to update.
+        email1 (str): The email of the first user.
+        email2 (str): The email of the second user.
+        
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure, and the chat ID or error.
+    """
     try:
         success1, user1 = get_user_by_email(email1, collection)
         success2, user2 = get_user_by_email(email2, collection)
@@ -242,3 +358,21 @@ def match_users(collection, email1, email2):
     except PyMongoError as error:
         logging.error('Error matching users: %s', error)
         return False, error
+
+def clear_mongo(collection):
+    """
+    Clear the specified MongoDB collection.
+    
+    Args:
+        collection: The MongoDB collection to clear.
+        
+    Returns:
+        bool: True if the collection was cleared successfully, False otherwise.
+    """
+    try:
+        collection.drop()
+        logging.info('Cleared collection: %s', collection.name)
+        return True
+    except PyMongoError as error:
+        logging.error('Error clearing collection: %s', error)
+        return False
