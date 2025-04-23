@@ -57,7 +57,7 @@ const UserInfo = () => {
       if (!token) {
         throw new Error("Invalid session token");
       }
-      await apiPost('/set_user_info', { email, user_info: userInfo, image }, token);
+      await apiPost('/set_user_info', { email, user_info: {userInfo, profile_image: image} }, token);
       console.log("User Info Saved Successfully!");
     } catch (error: any) {
       console.error("API Error:", error);

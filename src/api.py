@@ -11,6 +11,10 @@ from utils.firebase import *
 import hashlib
 from flask_cors import CORS
 
+import base64
+import re
+
+
 app = Flask(__name__)
 CORS(app, resources={
     r"/*": {
@@ -285,6 +289,20 @@ def set_user_info():
     if not success or user is None:
         logging.info("set_user_info: error fetching user")
         return session_token, 500
+    
+    #FOR IMAGE UPLOAODING
+    # 👇 Decode base64 profile image string if present
+    base64_image = user_info.get('profile_image')
+    if base64_image:
+        try:
+            base64_data = re.sub('^data:image/.+;base64,', '', base64_image)
+            image_bytes = base64.b64decode(base64_data)
+            user_info["profile_image"] = image_bytes
+        except Exception as e:
+            logging.error("set_user_info: failed to decode profile_image: %s", e)
+            return jsonify({"error": "Invalid image"}), 400
+
+
     
     logging.info("User found: %s", user)
     success = update_user_info(user, user_info, table, email)
