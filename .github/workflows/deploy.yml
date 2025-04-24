@@ -71,7 +71,24 @@ jobs:
           export PW='${{ env.PW }}'
           
           # Run the API and detach
-          nohup python3 src/api.py > /dev/null 2>&1 &
+          nohup python3 src/api.py > api.log 2>&1 &
+          API_PID=\$!
+
+          # Wait for the API to start to confirm it's running
+          sleep 5
+          if ! ps -p \$API_PID > /dev/null; then
+            echo 'API failed to start'
+            cat api.log
+            exit 1
+          fi
+          
+          # Check if the API is running
+          if ! curl -s http://localhost:3020/healthcheck -o /dev/null; then
+            echo 'API is not responding'
+            cat api.log
+            exit 1
+          fi
+
           
           # Print success message
           echo 'API successfully deployed and running on port 3020'
