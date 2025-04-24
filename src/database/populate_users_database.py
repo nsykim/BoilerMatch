@@ -3,11 +3,25 @@ import random
 import json
 import string
 from time import sleep
+import base64
 
 # Lists for generating names
 FIRST_NAMES = ["Alex", "Jamie", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Avery", "Peyton", "Skyler"]
 LAST_NAMES = ["Smith", "Johnson", "Brown", "Williams", "Jones", "Miller", "Davis", "Garcia", "Martinez", "Wilson"]
 HOBBIES = ["Reading", "Gaming", "Hiking", "Cooking", "Traveling", "Music", "Sports", "Photography", "Dancing", "Coding"]
+
+#upload user image
+def upload_profile_image(session_token, image_path="default.jpg"):
+    with open(image_path, "rb") as img_file:
+        files = {"file": img_file}
+        response = requests.post(
+            "http://127.0.0.1:3020/upload",
+            headers={"Authorization": session_token},
+            files=files
+        )
+    if response.status_code != 200:
+        print(f"Upload failed with status {response.status_code}: {response.text}")
+    return response.status_code == 200
 
 def generate_random_email():
     name = ''.join(random.choices(string.ascii_lowercase, k=8))
@@ -38,6 +52,23 @@ def generate_random_user_info():
         "bio": "I'm a student at Purdue, interested in meeting new people!",
         "hobbies": str(random.sample(HOBBIES, k=random.randint(2, 4)))
     }
+
+def generate_random_user_info_with_image(image_path="default.jpg"):
+    with open(image_path, "rb") as image_file:
+        base64_img = base64.b64encode(image_file.read()).decode("utf-8")
+        profile_image = f"data:image/jpeg;base64,{base64_img}"
+
+    return {
+        "userInfo": {
+            "first_name": random.choice(FIRST_NAMES),
+            "last_name": random.choice(LAST_NAMES),
+            "age": str(random.randint(18, 30)),  # as string to match frontend
+            "bio": "I'm a student at Purdue, interested in meeting new people!",
+            "hobbies": random.choice(HOBBIES),
+        },
+        "profile_image": profile_image
+    }
+
 
 def populate_database():
     base_url = "http://127.0.0.1:3020"
@@ -80,11 +111,16 @@ def populate_database():
         user_info_response = requests.post(
             f"{base_url}/set_user_info",
             headers={"Authorization": session_token},
-            json={"email": email, "user_info": generate_random_user_info()}
+            json={"email": email, "user_info": generate_random_user_info_with_image("default.jpg")}
         )
         if user_info_response.status_code != 200:
             print(f"Failed to set user info for user {i+1}: {email}")
             continue
+
+        # ✅ Upload profile image
+        # if not upload_profile_image(session_token, "default.jpg"):
+        #     print(f"Failed to upload profile image for user {i+1}: {email}")
+        #     continue
 
         print(f"Successfully created user {i+1}: {email}")
         created_users.append(email)

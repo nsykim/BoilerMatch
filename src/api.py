@@ -292,17 +292,8 @@ def set_user_info():
     
     #FOR IMAGE UPLOAODING
     # 👇 Decode base64 profile image string if present
-    base64_image = user_info.get('profile_image')
-    if base64_image:
-        try:
-            base64_data = re.sub('^data:image/.+;base64,', '', base64_image)
-            image_bytes = base64.b64decode(base64_data)
-            user_info["profile_image"] = image_bytes
-        except Exception as e:
-            logging.error("set_user_info: failed to decode profile_image: %s", e)
-            return jsonify({"error": "Invalid image"}), 400
-
-
+    # ✅ Do not decode — keep profile_image as a string
+    logging.info("set_user_info: storing profile image as-is")
     
     logging.info("User found: %s", user)
     success = update_user_info(user, user_info, table, email)

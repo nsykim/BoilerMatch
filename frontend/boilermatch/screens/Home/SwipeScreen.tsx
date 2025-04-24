@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { apiPost } from '@/api/api';
 import { darkTheme } from '@/styles/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image } from 'react-native';
+
 
 interface User {
   email: string;
@@ -15,6 +17,7 @@ interface User {
     school: string;
     bio: string;
     hobbies: string[];
+    profile_image?: string; // ✅ add this line
   }
 }
 
@@ -69,6 +72,8 @@ const SwipeScreen = () => {
         if (response.recommendations) {
           console.log(`Setting ${response.recommendations.length} users`);
           setUsers(response.recommendations);
+          //SHOULD DISPLAY ALLIMAGES
+          //console.log("Fetched recommendations:", JSON.stringify(response.recommendations, null, 2));
         } else {
           console.error('No recommendations in response');
           throw new Error('No recommendations available');
@@ -284,6 +289,17 @@ const SwipeScreen = () => {
         <Text style={styles.bio}>{user.email}</Text>
         <Text style={styles.bio}>{user.userInfo.age}</Text>
         <Text style={styles.school}>{user.school ?? "No school listed"}</Text>
+
+        {/* Profile Image */}
+        {user.userInfo.profile_image && (
+          <View style={{ marginVertical: 15 }}>
+            <Image
+              source={{ uri: user.userInfo.profile_image }}
+              style={{ width: 200, height: 200, borderRadius: 10 }}
+            />
+          </View>
+        )}
+
   
         <View style={styles.bioContainer}>
           <Text style={styles.bio}>{user.userInfo.bio ?? "No bio available"}</Text>
