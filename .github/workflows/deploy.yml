@@ -1,0 +1,130 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - integration/dev  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FIREBASE_CREDENTIALS_B64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }}
+      COLLEGE_API_KEY: ${{ secrets.COLLEGE_API_KEY}}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      USER_NAME: ${{ secrets.USER_NAME }}
+      PW: ${{ secrets.PW }} 
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install Dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        chmod +x run  # Ensure script is executable
+        ./run install  # Install dependencies
+        
+    - name: Create deployment package
+      run: |
+        # Create a tarball of the application
+        tar -czf build.tar.gz .
+        
+    - name: Deploy application to EC2
+      run: |
+        echo "${{ secrets.AWS_PEM }}" > boilermatch.pem
+        chmod 600 boilermatch.pem  # Secure the key file
+        
+        # Copy the tarball to EC2
+        scp -o StrictHostKeyChecking=no -i boilermatch.pem build.tar.gz ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }}:/home/${{ secrets.AWS_USER }}/build.tar.gz
+        
+        # Execute deployment commands on EC2
+        ssh -o StrictHostKeyChecking=no -i boilermatch.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }} << 'EOF'
+          # Remove existing repository if it exists
+          if [ -d "api_deployment" ]; then
+            echo "Removing existing repository..."
+            rm -rf api_deployment
+          fi
+          
+          # Create and extract to deployment directory
+          mkdir -p api_deployment
+          tar -xzf /home/${{ secrets.AWS_USER }}/build.tar.gz -C /home/${{ secrets.AWS_USER }}/api_deployment/
+          
+          # Change to the deployment directory
+          cd /home/${{ secrets.AWS_USER }}/api_deployment
+          
+          # Check and kill process on port 8080
+          echo "Checking for processes on port 8080..."
+          PID_8080=$(lsof -t -i:8080)
+          if [ -n "$PID_8080" ]; then
+            echo "Killing process $PID_8080 on port 8080..."
+            kill -9 $PID_8080
+            if [ $? -eq 0 ]; then
+              echo "Successfully killed process $PID_8080 on port 8080."
+            else
+              echo "Failed to kill process $PID_8080 on port 8080."
+            fi
+          else
+            echo "No process found on port 8080."
+          fi
+
+          # Check and kill process on port 8081
+          echo "Checking for processes on port 8081..."
+          PID_8081=$(lsof -t -i:8081)
+          if [ -n "$PID_8081" ]; then
+            echo "Killing process $PID_8081 on port 8081..."
+            kill -9 $PID_8081
+            if [ $? -eq 0 ]; then
+              echo "Successfully killed process $PID_8081 on port 8081."
+            else
+              echo "Failed to kill process $PID_8081 on port 8081."
+            fi
+          else
+            echo "No process found on port 8081."
+          fi
+
+    - name: Set up environment variables on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i boilermatch.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }} << 'EOF'
+          # Set up environment variables
+          echo "Setting up environment variables..."
+          echo "export FIREBASE_CREDENTIALS_B64='${{ env.FIREBASE_CREDENTIALS_B64 }}'" > /home/${{ secrets.AWS_USER }}/api_env.sh
+          echo "export COLLEGE_API_KEY='${{ env.COLLEGE_API_KEY }}'" >> /home/${{ secrets.AWS_USER }}/api_env.sh
+          echo "export JWT_SECRET='${{ env.JWT_SECRET }}'" >> /home/${{ secrets.AWS_USER }}/api_env.sh
+          echo "export USER_NAME='${{ env.USER_NAME }}'" >> /home/${{ secrets.AWS_USER }}/api_env.sh
+          echo "export PW='${{ env.PW }}'" >> /home/${{ secrets.AWS_USER }}/api_env.sh
+          chmod +x /home/${{ secrets.AWS_USER }}/api_env.sh
+
+    - name: Install dependencies and start API
+      run: |
+        ssh -o StrictHostKeyChecking=no -i boilermatch.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }} << 'EOF'
+          cd /home/${{ secrets.AWS_USER }}/api_deployment
+          
+          # Create and activate Python virtual environment
+          python3 -m venv venv
+          source venv/bin/activate
+          
+          # Install dependencies
+          echo "Installing Python dependencies..."
+          pip install -r requirements.txt
+          
+          # Source environment variables
+          echo "Sourcing environment variables..."
+          source /home/${{ secrets.AWS_USER }}/api_env.sh
+          
+          # Start the API in the background
+          echo "Starting API server in the background..."
+          nohup python3 src/api.py > api_output.log 2>&1 &
+          
+          echo "Deployment completed successfully."
+
+    - name: Clean up
+      run: |
+        rm -f boilermatch.pem
