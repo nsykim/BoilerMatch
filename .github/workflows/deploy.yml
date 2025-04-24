@@ -37,7 +37,7 @@ jobs:
     - name: Deploy to EC2
       run: |
         # Set up SSH key
-        echo "${{ secrets.AWS_PEM }}" > boilermatch.pem
+        echo "${{ secrets.AWS_PEM }}" | base64 -d > boilermatch.pem
         chmod 600 boilermatch.pem
         
         # Copy the tarball to EC2
