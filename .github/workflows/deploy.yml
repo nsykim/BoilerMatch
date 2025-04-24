@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - integration/dev  
+      - integration/noah/**
 
 jobs:
   deploy:
