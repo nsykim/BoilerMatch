@@ -262,7 +262,7 @@ const SwipeScreen = () => {
       console.log("User info is missing, skipping...");
       return (
         <View style={styles.emptyStateContainer}>
-          <Text style={styles.text}>Loading user data...</Text>
+          <Text style={styles.text}>No user data for {user.email}</Text>
         </View>
       );
     }
