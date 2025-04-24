@@ -72,7 +72,7 @@ jobs:
           
           # Configure Firebase
           mkdir -p src/utils
-          echo \$FIREBASE_CREDENTIALS_B64 | base64 -d > src/utils/firebase_credentials.json
+          echo \$FIREBASE_CREDENTIALS_B64 | base64 -d > src/utils/firebase_creds.json
 
           # Run the API and detach
           nohup python3 src/api.py > api.log 2>&1 &
