@@ -52,6 +52,10 @@ jobs:
           
           # Extract src files
           tar -xzf src.tar.gz -C api_deployment
+
+          # Prepare the python environment
+          sudo yum update -y
+          sudo yum install -y gcc python3-devel
           
           # Setup Python environment
           cd api_deployment
