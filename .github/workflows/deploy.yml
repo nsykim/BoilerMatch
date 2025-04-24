@@ -25,11 +25,6 @@ jobs:
       with:
         python-version: '3.10'
     
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        
     - name: Create src tarball
       run: |
         tar -czf src.tar.gz src/
@@ -42,6 +37,9 @@ jobs:
         
         # Copy the tarball to EC2
         scp -o StrictHostKeyChecking=no -i boilermatch.pem src.tar.gz ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }}:/home/${{ secrets.AWS_USER }}/src.tar.gz
+
+        # Copy the reqs.txt
+        scp -o StrictHostKeyChecking=no -i boilermatch.pem reqs.txt ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }}:/home/${{ secrets.AWS_USER }}/reqs.txt
         
         # Execute deployment on EC2
         ssh -o StrictHostKeyChecking=no -i boilermatch.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }} "
@@ -59,7 +57,7 @@ jobs:
           cd api_deployment
           python3 -m venv venv
           source venv/bin/activate
-          pip install -r /home/${{ secrets.AWS_USER }}/requirements.txt
+          pip install -r /home/${{ secrets.AWS_USER }}/reqs.txt
           
           # Setup environment variables
           export FIREBASE_CREDENTIALS_B64='${{ env.FIREBASE_CREDENTIALS_B64 }}'
