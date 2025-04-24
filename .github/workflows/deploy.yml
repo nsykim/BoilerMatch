@@ -70,6 +70,10 @@ jobs:
           export USER_NAME='${{ env.USER_NAME }}'
           export PW='${{ env.PW }}'
           
+          # Configure Firebase
+          mkdir -p src/utils
+          echo \$FIREBASE_CREDENTIALS_B64 | base64 -d > src/utils/firebase_credentials.json
+
           # Run the API and detach
           nohup python3 src/api.py > api.log 2>&1 &
           API_PID=\$!
