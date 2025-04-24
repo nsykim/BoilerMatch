@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { darkTheme } from '@/styles/theme'
-import { apiPost } from '@/api/api'
+import { apiGet, apiPost } from '@/api/api'
 import { useAuth } from '@/contexts/AuthContext';
+import { debounce } from 'lodash';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //navigation things
@@ -10,7 +11,6 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';  // Define this if you haven't already
 import UserInfo from "@/screens/Auth/UserInfo";
-
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_+-])[A-Za-z\d!@#$%^&*(),.?":{}|<>_+-]{8,64}$/
@@ -21,11 +21,33 @@ const AuthScreen = () => {
   const [password, setPassword] = useState('')
   const [school, setSchool] = useState('')
   const [loading, setLoading] = useState(false)
-  const { setEmail, setToken } = useAuth()
+  const [collegeSuggestions, setCollegeSuggestions] = useState<string[]>([])
 
+  const { setEmail, setToken } = useAuth()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  // Fetch colleges when the school input changes (>=3 chars)
+  useEffect(() => {
+    if (school.length >= 3) {
+      fetchCollegesDebounced(school);
+    } else {
+      setCollegeSuggestions([]);
+    }
+  }, [school]);
 
+  const fetchCollegesDebounced = debounce(async (query: string) => {
+    try {
+      const data = await apiGet(`/autocomplete_colleges?q=${encodeURIComponent(query)}`);
+      if (data?.colleges && data.colleges.length > 0) {
+        setCollegeSuggestions(data.colleges);
+      } else {
+        setCollegeSuggestions(["No colleges found"]);
+      }
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+      setCollegeSuggestions(["No colleges found"]);
+    }
+  }, 300);
 
   const handleRegister = async () => {
     if (!emailRegex.test(inputEmail)) {
@@ -38,6 +60,11 @@ const AuthScreen = () => {
         "Weak Password",
         "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."
       );
+      return;
+    }
+
+    if (collegeSuggestions && !collegeSuggestions.includes(school)) {
+      Alert.alert("Invalid School", "Please select a valid school from the suggestions.");
       return;
     }
   
@@ -67,11 +94,6 @@ const AuthScreen = () => {
       setLoading(false);
     }
   };
-  
-  
-  
-  
-  
   
   const handleLogin = async () => {
     if (!emailRegex.test(inputEmail)) {
@@ -105,7 +127,6 @@ const AuthScreen = () => {
     }
   };
 
-
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -131,13 +152,45 @@ const AuthScreen = () => {
             secureTextEntry
           />
 
-          {!isLogin && <TextInput
-            style={styles.input}
-            placeholder="School"
-            placeholderTextColor={darkTheme.text}
-            value={school}
-            onChangeText={setSchool}
-          />}
+          {!isLogin && (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="School"
+                placeholderTextColor={darkTheme.text}
+                value={school}
+                onChangeText={setSchool}
+              />
+              {collegeSuggestions.length > 0 && (
+                <View style={styles.dropdown}>
+                  <ScrollView nestedScrollEnabled={true}>
+                    {collegeSuggestions.map((college, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() => {
+                          if (college !== "No colleges found") {
+                            setSchool(college);
+                          }
+                        }}
+                        style={styles.dropdownItem}
+                        disabled={college === "No colleges found"}
+                      >
+                        <Text
+                          style={[
+                            styles.dropdownItemText,
+                            college === "No colleges found" && { color: "gray" },
+                          ]}
+                        >
+                          {college}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+            </>
+          )}
 
           <TouchableOpacity style={styles.button} onPress={isLogin ? handleLogin : handleRegister} disabled={loading}>
             <Text style={styles.buttonText}>{loading ? 'Loading...' : isLogin ? 'Login' : 'Register'}</Text>
@@ -197,5 +250,24 @@ const styles = StyleSheet.create({
   switchText: {
     color: darkTheme.primary,
     marginTop: 10,
+  },
+  dropdown: {
+    width: '100%',
+    backgroundColor: darkTheme.inputBackground,
+    borderColor: darkTheme.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    maxHeight: 150,
+    marginBottom: 10,
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomColor: darkTheme.border,
+    borderBottomWidth: 1,
+  },
+  dropdownItemText: {
+    color: darkTheme.text,
+    fontSize: 16,
   },
 })
