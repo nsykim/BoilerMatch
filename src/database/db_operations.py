@@ -318,13 +318,15 @@ def match_users(collection, email1, email2):
     try:
         success1, user1 = get_user_by_email(email1, collection)
         success2, user2 = get_user_by_email(email2, collection)
-        if success1 == False or success2 == False:
+        if not success1 or not success2:
             logging.info('Match users: one or both users not found')
             return False, -2
         logging.info('Match users: successfully retrieved both users')
+
         emails = sorted([email1, email2])
         chatID = hashlib.sha256("_".join(emails).encode()).hexdigest()[:16]
 
+        # Check if chat already exists
         if any(chat.get('chat_id') == chatID for chat in user1.get('chats', [])) or \
            any(chat.get('chat_id') == chatID for chat in user2.get('chats', [])):
             logging.info('Match users: chatID already exists')
@@ -332,8 +334,32 @@ def match_users(collection, email1, email2):
         
         logging.info('Match users: generated chatID %s', chatID)
         matchTime = int(time.time())
-        user1['chats'].append({"chat_id" : chatID, "lastUpdated" : matchTime})
-        user2['chats'].append({"chat_id" : chatID, "lastUpdated" : matchTime})
+
+        # Get display names
+        display1 = f"{user1['userInfo'].get('first_name', '')} {user1['userInfo'].get('last_name', '')}".strip()
+        display2 = f"{user2['userInfo'].get('first_name', '')} {user2['userInfo'].get('last_name', '')}".strip()
+
+        # Add chat entry with participant info
+        chat_entry1 = {
+            "chat_id": chatID,
+            "lastUpdated": matchTime,
+            "participant": {
+                "email": email2,
+                "name": display2
+            }
+        }
+        chat_entry2 = {
+            "chat_id": chatID,
+            "lastUpdated": matchTime,
+            "participant": {
+                "email": email1,
+                "name": display1
+            }
+        }
+
+        user1['chats'].append(chat_entry1)
+        user2['chats'].append(chat_entry2)
+
         try:
             collection.update_one({"email": email1}, {"$set": {"chats": user1['chats']}})
             collection.update_one({"email": email2}, {"$set": {"chats": user2['chats']}})
