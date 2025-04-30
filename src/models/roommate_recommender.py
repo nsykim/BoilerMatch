@@ -139,6 +139,7 @@ class RoommateRecommender:
         target_vector = np.array(self._extract_feature_vector(target_user)).reshape(1, -1)
         filtered_users = self._filter_by_preferences(target_user, school_users)
         logging.info(f"Filtered users count: {len(filtered_users)}")
+
         if not filtered_users:
             logging.warning("All users filtered out due to dealbreaker preferences")
             return []
@@ -149,7 +150,11 @@ class RoommateRecommender:
         logging.debug(f"Sample user vector: {user_vectors[0] if len(user_vectors) > 0 else 'No users'}")
         
         try:
+            # Removes error where n_samples < n_neighbors by re-fitting the model
+            num_neighbors = min(self.n_neighbors, len(user_vectors))
+            self.model = NearestNeighbors(n_neighbors=num_neighbors, metric='euclidean')
             self.model.fit(user_vectors)
+
             distances, indices = self.model.kneighbors(target_vector)
             
             logging.debug(f"Raw distances: {distances[0]}")

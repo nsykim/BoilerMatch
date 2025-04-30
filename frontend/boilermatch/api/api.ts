@@ -16,25 +16,37 @@ export const isTokenExpired = (token: string): boolean => {
   }
 };
 
-const apiGet = async (endpoint: string) => {
+const apiGet = async (endpoint: string, token?: string) => {
   try {
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      method: "GET",
+      headers,
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        await AsyncStorage.removeItem("session_token");
+        await AsyncStorage.removeItem("email");
+        useAuth().setToken(null);
+        Alert.alert("Session Expired", "Your session has expired. Please log in again.");
+        return null;
+      }
       const errorText = await response.text();
-      throw new Error(errorText || 'Error with GET request');
+      throw new Error(errorText || "Error with GET request");
     }
 
     const data = await response.json();
     return data;
   } catch (error: any) {
-    console.error('API GET Error:', error);
-    Alert.alert('Error', error.message || 'Something went wrong');
+    console.error("API GET Error:", error);
     throw error;
   }
 };

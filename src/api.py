@@ -140,12 +140,24 @@ def login():
     
 @app.route('/autocomplete_colleges', methods=['GET'])
 def autocomplete_colleges():
+    """
+    Autocompletes college names based on a user-typed query.
+
+    Requires:
+    - q: A query string in the URL parameters (e.g., /autocomplete_colleges?q=berk).
+    - session_token: The session token of the user in the Authorization header.
+
+    Return Codes:
+    - 200: Successfully returned a list of matching colleges.
+    - 500: Error retrieving college suggestions.
+    """
+
     query = request.args.get('q', '').strip()
     result, status_code = fetch_colleges(query)
-    
+
     if isinstance(result, dict):
         return jsonify(result), status_code
-    
+
     return jsonify({"colleges": result}), status_code
 
 @app.route('/get_roommate_recommendations', methods=['POST'])
