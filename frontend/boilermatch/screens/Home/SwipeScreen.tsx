@@ -11,12 +11,14 @@ interface User {
   email: string;
   school: string;
   userInfo: {
-    first_name: string;
-    last_name: string;
-    age: number;
-    school: string;
-    bio: string;
-    hobbies: string[];
+    userInfo: {
+      first_name: string;
+      last_name: string;
+      age: number;
+      school: string;
+      bio: string;
+      hobbies: string[];
+    }
     profile_image?: string; // ✅ add this line
   }
 }
@@ -87,7 +89,7 @@ const SwipeScreen = () => {
   }, [email, token]);
 
   const handleSwipeLeft = (user: User) => {
-    console.log(`=== SWIPE LEFT for ${user.userInfo.first_name} ===`);
+    console.log(`=== SWIPE LEFT for ${user.userInfo.userInfo.first_name} ===`);
     setPassedUsers(prev => {
       console.log(`Adding user to passed list. New count: ${prev.length + 1}`);
       return [...prev, user];
@@ -97,7 +99,7 @@ const SwipeScreen = () => {
   };
 
   const handleLike = async (user: User) => {
-    console.log(`=== LIKING ${user.userInfo.first_name} ===`);
+    console.log(`=== LIKING ${user.userInfo.userInfo.first_name} ===`);
   
     try {
       if (!token) {
@@ -123,7 +125,7 @@ const SwipeScreen = () => {
   };
   
   const handleSwipeRight = (user: User) => {
-    console.log(`=== SWIPE RIGHT for ${user.userInfo.first_name} ===`);
+    console.log(`=== SWIPE RIGHT for ${user.userInfo.userInfo.first_name} ===`);
     handleLike(user);
     setLikedUsers((prev) => [...prev, user]);
     console.log("Calling advanceToNextUser() from handleSwipeRight");
@@ -191,7 +193,7 @@ const SwipeScreen = () => {
             setUsers((prevUsers) => {
               console.log(prevUsers[0])
               if (prevUsers.length > 0) {
-                console.log(`Calling handleSwipeRight for user: ${prevUsers[0].userInfo.first_name}`);
+                console.log(`Calling handleSwipeRight for user: ${prevUsers[0].userInfo.userInfo.first_name}`);
                 handleSwipeRight(prevUsers[0]);
                 return prevUsers.slice(1); // Remove swiped user
               } else {
@@ -215,7 +217,7 @@ const SwipeScreen = () => {
   
             setUsers((prevUsers) => {
               if (prevUsers.length > 0) {
-                console.log(`Calling handleSwipeLeft for user: ${prevUsers[0].userInfo.first_name}`);
+                console.log(`Calling handleSwipeLeft for user: ${prevUsers[0].userInfo.userInfo.first_name}`);
                 handleSwipeLeft(prevUsers[0]);
                 return prevUsers.slice(1); // Remove swiped user
               } else {
@@ -284,10 +286,10 @@ const SwipeScreen = () => {
   
         {/* User details */}
         <Text style={styles.name}>
-          {user.userInfo.first_name ?? "Unknown"} {user.userInfo.last_name ?? ""}
+          {user.userInfo.userInfo.first_name ?? "Unknown"} {user.userInfo.userInfo.last_name ?? ""}
         </Text>
         <Text style={styles.bio}>{user.email}</Text>
-        <Text style={styles.bio}>{user.userInfo.age}</Text>
+        <Text style={styles.bio}>{user.userInfo.userInfo.age}</Text>
         <Text style={styles.school}>{user.school ?? "No school listed"}</Text>
 
         {/* Profile Image */}
@@ -302,20 +304,20 @@ const SwipeScreen = () => {
 
   
         <View style={styles.bioContainer}>
-          <Text style={styles.bio}>{user.userInfo.bio ?? "No bio available"}</Text>
+          <Text style={styles.bio}>{user.userInfo.userInfo.bio ?? "No bio available"}</Text>
         </View>
   
-        {user.userInfo.hobbies && user.userInfo.hobbies.length > 0 && (
+        {user.userInfo.userInfo.hobbies && user.userInfo.userInfo.hobbies.length > 0 && (
           <View style={styles.hobbiesContainer}>
             <Text style={styles.hobbiesTitle}>Hobbies:</Text>
             <View style={styles.hobbiesTags}>
-              {Array.isArray(user.userInfo.hobbies)
-                ? user.userInfo.hobbies.map((hobby, index) => (
+              {Array.isArray(user.userInfo.userInfo.hobbies)
+                ? user.userInfo.userInfo.hobbies.map((hobby, index) => (
                     <View key={index} style={styles.hobbyTag}>
                       <Text style={styles.hobbyText}>{hobby}</Text>
                     </View>
                   ))
-                : <Text>{user.userInfo.hobbies}</Text>}
+                : <Text>{user.userInfo.userInfo.hobbies}</Text>}
             </View>
           </View>
         )}

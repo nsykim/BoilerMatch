@@ -53,18 +53,22 @@ def generate_random_user_info():
         "hobbies": str(random.sample(HOBBIES, k=random.randint(2, 4)))
     }
 
-def generate_random_user_info_with_image(image_path="default.jpg"):
-    with open(image_path, "rb") as image_file:
+def generate_random_user_info_with_image():
+
+    image_filename = f"image{random.randint(1, 4)}.jpg"  # ✅ random image
+    with open(image_filename, "rb") as image_file:
         base64_img = base64.b64encode(image_file.read()).decode("utf-8")
         profile_image = f"data:image/jpeg;base64,{base64_img}"
 
     return {
         "userInfo": {
-            "first_name": random.choice(FIRST_NAMES),
-            "last_name": random.choice(LAST_NAMES),
-            "age": str(random.randint(18, 30)),  # as string to match frontend
-            "bio": "I'm a student at Purdue, interested in meeting new people!",
-            "hobbies": random.choice(HOBBIES),
+            "userInfo": {
+                "first_name": random.choice(FIRST_NAMES),
+                "last_name": random.choice(LAST_NAMES),
+                "age": str(random.randint(18, 30)),  # as string to match frontend
+                "bio": "I'm a student at Purdue, interested in meeting new people!",
+                "hobbies": random.sample(HOBBIES, k=random.randint(2, 4))
+            }
         },
         "profile_image": profile_image
     }
@@ -80,7 +84,7 @@ def populate_database():
         
         create_response = requests.post(
             f"{base_url}/create_account",
-            json={"email": email, "password": password, "school": "Purdue University"}
+            json={"email": email, "password": password, "school": "Purdue University-Main Campus"}
         )
         if create_response.status_code != 200:
             print(f"Failed to create user {i+1}: {email}")
@@ -111,7 +115,7 @@ def populate_database():
         user_info_response = requests.post(
             f"{base_url}/set_user_info",
             headers={"Authorization": session_token},
-            json={"email": email, "user_info": generate_random_user_info_with_image("default.jpg")}
+            json={"email": email, "user_info": generate_random_user_info_with_image()}
         )
         if user_info_response.status_code != 200:
             print(f"Failed to set user info for user {i+1}: {email}")

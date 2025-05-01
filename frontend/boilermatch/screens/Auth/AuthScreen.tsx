@@ -81,7 +81,7 @@ const AuthScreen = () => {
       await apiPost("/create_account", { email: inputEmail, password: encodedPassword, school });
   
       // Log in after successful registration #NEED THIS TO USE SAME SETPREFERENCES SCREEN AND SUCH
-      
+      console.log( "poopoo", { email: inputEmail, password: encodedPassword });
       const { session_token: token } = await apiPost("/login", { email: inputEmail, password: encodedPassword });
   
       // ✅ Correctly store new user flag
@@ -115,6 +115,7 @@ const AuthScreen = () => {
     setLoading(true);
     try {
       const encodedPassword = password;//utf8ToBase64(password); //ENCODING
+      console.log( "poopoo", { email: inputEmail, password: encodedPassword });
       const { session_token: token } = await apiPost('/login', { email: inputEmail, password: encodedPassword });
 
       setEmail(inputEmail);
