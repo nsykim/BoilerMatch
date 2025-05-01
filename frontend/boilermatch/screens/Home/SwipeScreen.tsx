@@ -299,7 +299,7 @@ const SwipeScreen = () => {
                       <Text style={styles.hobbyText}>{hobby}</Text>
                     </View>
                   ))
-                : <Text>{user.userInfo.hobbies}</Text>}
+                : <Text style={styles.hobbyText}>{user.userInfo.hobbies}</Text>}
             </View>
           </View>
         )}

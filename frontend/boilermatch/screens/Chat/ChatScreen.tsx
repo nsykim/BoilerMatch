@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, TextInput, TouchableOpacity, Text, View } from 'react-native';
+import {
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/contexts/AuthContext';
 import { apiPost } from '@/api/api';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { darkTheme } from '@/styles/theme'; // adjust if needed
 
 const ChatScreen = () => {
   const [chats, setChats] = useState<any[]>([]);
@@ -10,6 +21,7 @@ const ChatScreen = () => {
   const [messageText, setMessageText] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
+  const { token: st } = useAuth();
 
   useEffect(() => {
     const loadChats = async () => {
@@ -27,7 +39,7 @@ const ChatScreen = () => {
   }, []);
 
   const handleOpenChat = async (chatId: string) => {
-    const history = await apiPost('/open_chat', { email, chat_id: chatId }, token);
+    const history = await apiPost('/open_chat', { email }, token, chatId);
     if (history) {
       setSelectedChatId(chatId);
       setChatHistory(history);
@@ -40,41 +52,58 @@ const ChatScreen = () => {
     const res = await apiPost('/send_message', {
       email,
       content: messageText,
-      chat_id: selectedChatId
-    }, token);
+    }, token, selectedChatId);
 
     if (res !== null) {
       setMessageText('');
-      handleOpenChat(selectedChatId); // refresh messages
+      handleOpenChat(selectedChatId);
     }
   };
 
   const renderChatItem = ({ item }: any) => (
-    <TouchableOpacity onPress={() => handleOpenChat(item.chat_id)}>
-      <Text style={{ padding: 10 }}>{item.other_user_email}</Text>
+    <TouchableOpacity onPress={() => handleOpenChat(item.chat_id)} style={styles.chatItem}>
+      <Text style={styles.text}>{item.participant?.name || item.participant?.email}</Text>
     </TouchableOpacity>
   );
 
+  const selectedChat = chats.find(c => c.chat_id === selectedChatId);
+  const participantName = selectedChat?.participant?.name || "Chat";
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       {selectedChatId ? (
         <>
+          <View style={styles.chatHeader}>
+            <TouchableOpacity onPress={() => setSelectedChatId(null)}>
+              <Text style={styles.backText}>← Back</Text>
+            </TouchableOpacity>
+            <Text style={styles.chatTitle}>{participantName}</Text>
+          </View>
           <FlatList
             data={chatHistory}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => (
-              <Text style={{ padding: 10 }}>{item.sender}: {item.content}</Text>
+              <Text style={styles.messageText}>{item.sender}: {item.content}</Text>
             )}
+            contentContainerStyle={styles.chatList}
           />
-          <TextInput
-            placeholder="Type a message..."
-            value={messageText}
-            onChangeText={setMessageText}
-            style={{ padding: 10, borderWidth: 1 }}
-          />
-          <TouchableOpacity onPress={handleSendMessage}>
-            <Text style={{ padding: 10, backgroundColor: '#ccc' }}>Send</Text>
-          </TouchableOpacity>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={90}
+          >
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Type a message..."
+                placeholderTextColor={darkTheme.text}
+                value={messageText}
+                onChangeText={setMessageText}
+                style={styles.input}
+              />
+              <TouchableOpacity onPress={handleSendMessage} style={styles.sendButton}>
+                <Text style={styles.sendText}>Send</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
         </>
       ) : (
         <FlatList
@@ -87,6 +116,70 @@ const ChatScreen = () => {
   );
 };
 
-export default ChatScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: darkTheme.background,
+    padding: 10,
+  },
+  chatItem: {
+    padding: 12,
+    borderBottomColor: '#444',
+    borderBottomWidth: 1,
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginBottom: 4,
+  },
+  backText: {
+    color: darkTheme.primary,
+    fontSize: 18,
+    marginRight: 10,
+  },
+  chatTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: darkTheme.text,
+  },
+  chatList: {
+    flexGrow: 1,
+    paddingBottom: 10,
+  },
+  messageText: {
+    paddingVertical: 8,
+    color: darkTheme.text,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#444',
+    padding: 8,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#333',
+    color: darkTheme.text,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  sendButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginLeft: 8,
+    backgroundColor: darkTheme.primary,
+    borderRadius: 20,
+  },
+  sendText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  text: {
+    color: darkTheme.text,
+  },
+});
 
-// const styles = StyleSheet.create({})
+export default ChatScreen;
