@@ -570,8 +570,8 @@ class TestDatabaseOperations(unittest.TestCase):
         
         with patch('database.db_operations.get_user_by_email') as mock_get_user:
             mock_get_user.side_effect = [
-                (True, {"email": email1, "chats": [{"chat_id": expected_chat_id, "lastUpdated": 1000}]}),
-                (True, {"email": email2, "chats": []})
+                (True, {"email": email1, "chats": [{"chat_id": expected_chat_id, "lastUpdated": 1000}], "userInfo": {"first_name": "test1", "last_name": "1"}}),
+                (True, {"email": email2, "chats": [], "userInfo": {"first_name": "test2", "last_name": "2"}})
             ]
             
             success, result = match_users(self.mock_collection, email1, email2)
