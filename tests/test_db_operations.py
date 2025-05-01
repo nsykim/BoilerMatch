@@ -492,15 +492,15 @@ class TestDatabaseOperations(unittest.TestCase):
         
         # Configure mocks
         self.mock_collection.find_one.side_effect = [
-            {"email": email1, "chats": []},
-            {"email": email2, "chats": []}
+            {"email": email1, "chats": [], "userInfo": {"first_name": "test1", "last_name": "1"}},
+            {"email": email2, "chats": [], "userInfo": {"first_name": "test2", "last_name": "2"}}
         ]
         
         # Configure get_user_by_email mock returns
         with patch('database.db_operations.get_user_by_email') as mock_get_user:
             mock_get_user.side_effect = [
-                (True, {"email": email1, "chats": []}),
-                (True, {"email": email2, "chats": []})
+                (True, {"email": email1, "chats": [], "userInfo": {"first_name": "test1", "last_name": "1"}}),
+                (True, {"email": email2, "chats": [], "userInfo": {"first_name": "test2", "last_name": "2"}})
             ]
             
             # Execute test
@@ -541,16 +541,16 @@ class TestDatabaseOperations(unittest.TestCase):
         with patch('database.db_operations.get_user_by_email') as mock_get_user:
             # First match
             mock_get_user.side_effect = [
-                (True, {"email": email1, "chats": []}),
-                (True, {"email": email2, "chats": []})
+                (True, {"email": email1, "chats": [], "userInfo": {"first_name": "test1", "last_name": "1"}}),
+                (True, {"email": email2, "chats": [], "userInfo": {"first_name": "test2", "last_name": "2"}})
             ]
             success1, chat_id1 = match_users(self.mock_collection, email1, email2)
             
             # Reset mock for second match
             self.mock_collection.reset_mock()
             mock_get_user.side_effect = [
-                (True, {"email": email2, "chats": []}),
-                (True, {"email": email1, "chats": []})
+                (True, {"email": email2, "chats": [], "userInfo": {"first_name": "test1", "last_name": "1"}}),
+                (True, {"email": email1, "chats": [], "userInfo": {"first_name": "test2", "last_name": "2"}})
             ]
             success2, chat_id2 = match_users(self.mock_collection, email2, email1)
             
@@ -598,8 +598,8 @@ class TestDatabaseOperations(unittest.TestCase):
         
         with patch('database.db_operations.get_user_by_email') as mock_get_user:
             mock_get_user.side_effect = [
-                (True, {"email": email1, "chats": []}),
-                (True, {"email": email2, "chats": []})
+                (True, {"email": email1, "chats": [], "userInfo": {"first_name": "test1", "last_name": "1"}}),
+                (True, {"email": email2, "chats": [], "userInfo": {"first_name": "test2", "last_name": "2"}})
             ]
             
             self.mock_collection.update_one.side_effect = PyMongoError("Failed to update user")
