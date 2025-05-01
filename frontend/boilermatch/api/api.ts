@@ -51,7 +51,7 @@ const apiGet = async (endpoint: string, token?: string) => {
   }
 };
 
-const apiPost = async (endpoint: string, body: object, token?: string) => {
+const apiPost = async (endpoint: string, body: object, token?: string, chat_id?: string) => {
   try {
     console.log(`${API_BASE_URL}${endpoint}`);
 
@@ -72,6 +72,10 @@ const apiPost = async (endpoint: string, body: object, token?: string) => {
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    if (chat_id) {
+      headers["chat_id"] = chat_id
     }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

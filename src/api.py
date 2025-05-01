@@ -383,7 +383,7 @@ def send_message():
     table = accounts_db["accounts"]
     if fb_send_message(chat_id, email, content, table):
         logging.info("send_message: message sent successfully")
-        return '', 200
+        return jsonify({"message": "message sent successfully"}), 200
     else:
         logging.error("send_message: message could not be sent")
         return '', 500

@@ -49,7 +49,7 @@ def populate_database():
         
         create_response = requests.post(
             f"{base_url}/create_account",
-            json={"email": email, "password": password, "school": "Purdue University"}
+            json={"email": email, "password": password, "school": "Purdue University-Main Campus"}
         )
         if create_response.status_code != 200:
             print(f"Failed to create user {i+1}: {email}")
