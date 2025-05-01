@@ -422,7 +422,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"other\": \"fsdfds@gmail.com\"\r\n}",
+					"raw": "{\r\n    \"email\": \"fsdfds@gmail.com\",\r\n    \"user_info\": {\"first_name\": \"test1\", \"last_name\": \"1\"}\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -459,7 +459,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"other\": \"noah@gmail.com\"\r\n}",
+					"raw": "{\r\n    \"email\": \"noah@gmail.com\",\r\n    \"user_info\": {\"first_name\": \"test2\", \"last_name\": \"2\"}\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
