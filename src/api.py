@@ -86,7 +86,7 @@ def create_account():
         return '', 400
     logging.info("create_account: email address is unique")
 
-    hashed_pw = bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt(rounds=12))
+    hashed_pw = bcrypt.hashpw(pw.encode("utf-8"), bcrypt.gensalt(log_rounds=12))
 
     success, result = create_user(table, email, hashed_pw, school) 
     if success == True:
