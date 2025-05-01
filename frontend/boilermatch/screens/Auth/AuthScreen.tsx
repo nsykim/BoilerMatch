@@ -12,6 +12,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';  // Define this if you haven't already
 import UserInfo from "@/screens/Auth/UserInfo";
 
+//frontend encoding function for usernames and passwords
+function utf8ToBase64(str: string): string {
+  const utf8Bytes = new TextEncoder().encode(str);
+  return btoa(String.fromCharCode(...utf8Bytes));
+}
+
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_+-])[A-Za-z\d!@#$%^&*(),.?":{}|<>_+-]{8,64}$/
 
@@ -23,7 +30,7 @@ const AuthScreen = () => {
   const [loading, setLoading] = useState(false)
   const [collegeSuggestions, setCollegeSuggestions] = useState<string[]>([])
 
-  const { setEmail, setToken } = useAuth()
+  const { setEmail, setToken, setIsNewUser } = useAuth()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Fetch colleges when the school input changes (>=3 chars)
@@ -70,10 +77,12 @@ const AuthScreen = () => {
   
     setLoading(true);
     try {
-      await apiPost("/create_account", { email: inputEmail, password, school });
+      const encodedPassword = password;//utf8ToBase64(password); //ENCODING
+      await apiPost("/create_account", { email: inputEmail, password: encodedPassword, school });
   
       // Log in after successful registration #NEED THIS TO USE SAME SETPREFERENCES SCREEN AND SUCH
-      const { session_token: token } = await apiPost("/login", { email: inputEmail, password });
+      
+      const { session_token: token } = await apiPost("/login", { email: inputEmail, password: encodedPassword });
   
       // ✅ Correctly store new user flag
       //await AsyncStorage.setItem("is_new_user", "true");
@@ -105,7 +114,8 @@ const AuthScreen = () => {
 
     setLoading(true);
     try {
-      const { session_token: token } = await apiPost('/login', { email: inputEmail, password });
+      const encodedPassword = password;//utf8ToBase64(password); //ENCODING
+      const { session_token: token } = await apiPost('/login', { email: inputEmail, password: encodedPassword });
 
       setEmail(inputEmail);
       setToken(token);

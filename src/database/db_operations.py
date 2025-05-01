@@ -55,6 +55,13 @@ def connect_to_mongodb(database):
         client = MongoClient(mongo_uri)
         db = client[database]
         logging.info('Connected to MongoDB')
+
+        #for debugging
+        #uri = "mongodb://localhost:27017/"  # or your Atlas URI
+        print("[DEBUG] Connected to Mongo URI:", mongo_uri)
+        print("[DEBUG] Using Database:", db.name)
+        print("[DEBUG] Collections in DB:", db.list_collection_names())
+
         return True, db
     except PyMongoError as error:
         logging.error('Error connecting to MongoDB: %s', error)
