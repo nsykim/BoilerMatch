@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b6f93674-31e7-4b78-a650-acaab00eacfa",
+		"_postman_id": "8edb2050-5c5e-45ed-9108-4bbd8d1c1f25",
 		"name": "BoilerMatch",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "40185812"
+		"_exporter_id": "44603801"
 	},
 	"item": [
 		{
@@ -404,6 +404,80 @@
 					"port": "3020",
 					"path": [
 						"set_preferences"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc1 set user info",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st1}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"other\": \"fsdfds@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/set_user_info",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"set_user_info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acc2 set user info",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{st2}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"other\": \"noah@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3020/set_user_info",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3020",
+					"path": [
+						"set_user_info"
 					]
 				}
 			},
