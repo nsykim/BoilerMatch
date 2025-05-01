@@ -618,10 +618,10 @@ class TestDatabaseOperations(unittest.TestCase):
         
         # Configure mocks
         self.mock_collection.find_one.side_effect = [
-            {"email": email1, "likes": []},  # user1
-            {"email": email2, "likes": []}   # user2
+            {"email": email1, "likes": [], "userInfo": {"first_name": "test1", "last_name": "1"}},  # user1
+            {"email": email2, "likes": [], "userInfo": {"first_name": "test2", "last_name": "2"}}   # user2
         ]
-        
+
         
         # Execute test
         success, result = add_like(self.mock_collection, email1, email2)
@@ -642,8 +642,8 @@ class TestDatabaseOperations(unittest.TestCase):
         
         # Configure mocks for initial like check
         self.mock_collection.find_one.side_effect = [
-            {"email": email1, "likes": [email2]},
-            {"email": email2, "likes": []}
+            {"email": email1, "likes": [email2], "userInfo": {"first_name": "test1", "last_name": "1"}},
+            {"email": email2, "likes": [], "userInfo": {"first_name": "test1", "last_name": "2"}}
         ]
         
         # Mock match_users at the correct import level
@@ -667,7 +667,7 @@ class TestDatabaseOperations(unittest.TestCase):
         
         # Configure mock to return None for user2
         self.mock_collection.find_one.side_effect = [
-            {"email": email1, "likes": []},
+            {"email": email1, "likes": [], "userInfo": {"first_name": "test1", "last_name": "1"}},
             None
         ]
         
@@ -686,8 +686,8 @@ class TestDatabaseOperations(unittest.TestCase):
         
         # Configure mocks
         self.mock_collection.find_one.side_effect = [
-            {"email": email1, "likes": []},
-            {"email": email2, "likes": []}
+            {"email": email1, "likes": [], "userInfo": {"first_name": "test1", "last_name": "2"}},
+            {"email": email2, "likes": [], "userInfo": {"first_name": "test2", "last_name": "2"}}
         ]
         self.mock_collection.update_one.side_effect = PyMongoError("Update failed")
         
@@ -706,8 +706,8 @@ class TestDatabaseOperations(unittest.TestCase):
         
         # Configure mocks - user1 doesn't have a likes array yet
         self.mock_collection.find_one.side_effect = [
-            {"email": email1},  # No likes array
-            {"email": email2, "likes": []}
+            {"email": email1, "userInfo": {"first_name": "test1", "last_name": "1"}},  # No likes array
+            {"email": email2, "likes": [], "userInfo": {"first_name": "test1", "last_name": "2"}}
         ]
         
         # Execute test
