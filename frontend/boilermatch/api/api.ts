@@ -75,7 +75,7 @@ const apiPost = async (endpoint: string, body: object, token?: string, chat_id?:
     }
 
     if (chat_id) {
-      headers["chat_id"] = chat_id
+      headers["Chat-Id"] = chat_id
     }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

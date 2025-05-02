@@ -83,7 +83,7 @@ const ChatScreen = () => {
             data={chatHistory}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => (
-              <Text style={styles.messageText}>{item.sender}: {item.content}</Text>
+              <Text style={styles.messageText}>{participantName}: {item.content}</Text>
             )}
             contentContainerStyle={styles.chatList}
           />

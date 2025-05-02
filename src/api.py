@@ -414,7 +414,7 @@ def open_chat():
     - 500: Error retrieving chat history.
     """
     body = request.json
-    chat_id = request.headers['chat_id']
+    chat_id = request.headers['Chat-Id']
     session_token = request.headers['Authorization']
     email = body.get('email')
 

@@ -355,8 +355,8 @@ def match_users(collection, email1, email2):
         matchTime = int(time.time())
 
         # Get display names
-        display1 = f"{user1['userInfo'].get('first_name', '')} {user1['userInfo'].get('last_name', '')}".strip()
-        display2 = f"{user2['userInfo'].get('first_name', '')} {user2['userInfo'].get('last_name', '')}".strip()
+        display1 = f"{user1['userInfo'].get('userInfo').get('first_name', '')} {user1['userInfo'].get('userInfo').get('last_name', '')}".strip()
+        display2 = f"{user2['userInfo'].get('userInfo').get('first_name', '')} {user2['userInfo'].get('userInfo').get('last_name', '')}".strip()
 
         # Add chat entry with participant info
         chat_entry1 = {

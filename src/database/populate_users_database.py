@@ -62,13 +62,11 @@ def generate_random_user_info_with_image():
 
     return {
         "userInfo": {
-            "userInfo": {
-                "first_name": random.choice(FIRST_NAMES),
-                "last_name": random.choice(LAST_NAMES),
-                "age": str(random.randint(18, 30)),  # as string to match frontend
-                "bio": "I'm a student at Purdue, interested in meeting new people!",
-                "hobbies": random.sample(HOBBIES, k=random.randint(2, 4))
-            }
+            "first_name": random.choice(FIRST_NAMES),
+            "last_name": random.choice(LAST_NAMES),
+            "age": str(random.randint(18, 30)),  # as string to match frontend
+            "bio": "I'm a student at Purdue, interested in meeting new people!",
+            "hobbies": random.sample(HOBBIES, k=random.randint(2, 4))
         },
         "profile_image": profile_image
     }
@@ -78,7 +76,7 @@ def populate_database():
     base_url = "http://127.0.0.1:3020"
     created_users = []
 
-    for i in range(99):
+    for i in range(60):
         email = generate_random_email()
         password = "testpassword123"
         

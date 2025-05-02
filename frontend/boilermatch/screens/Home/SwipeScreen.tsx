@@ -246,6 +246,7 @@ const SwipeScreen = () => {
     console.log(
       `Render card. Users: [${users.map(user => user.email).join(", ")}], Current User: ${users[0]?.email}, Transitioning: ${isTransitioning}`
     );
+    
   
     if (users.length === 0) {
       return (
@@ -264,6 +265,7 @@ const SwipeScreen = () => {
     }
   
     const user = users[0];
+    console.log("Info:", user.userInfo)
   
     if (!user?.userInfo) {
       console.log("User info is missing, skipping...");
@@ -288,7 +290,6 @@ const SwipeScreen = () => {
         <Text style={styles.name}>
           {user.userInfo.userInfo.first_name ?? "Unknown"} {user.userInfo.userInfo.last_name ?? ""}
         </Text>
-        <Text style={styles.bio}>{user.email}</Text>
         <Text style={styles.bio}>{user.userInfo.userInfo.age}</Text>
         <Text style={styles.school}>{user.school ?? "No school listed"}</Text>
 
