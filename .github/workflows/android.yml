@@ -35,6 +35,8 @@ jobs:
         run: |
           cd frontend/boilermatch
           npm ci
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
       - name: Prebuild native project
         run: |
           cd frontend/boilermatch
