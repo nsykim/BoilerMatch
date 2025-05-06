@@ -35,7 +35,12 @@ jobs:
         run: |
           cd frontend/boilermatch
           npm ci
-      - name: Build Android App
+      - name: Prebuild native project
+        run: |
+          cd frontend/boilermatch
+          eas prebuild --platform android
+
+      - name: Build Android App Locally
         run: |
           cd frontend/boilermatch
           eas build --platform android --profile development --local --output app-release.apk
