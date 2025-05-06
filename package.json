@@ -14,5 +14,8 @@
   "license": "ISC",
   "devDependencies": {
     "newman": "^6.2.1"
+  },
+  "dependencies": {
+    "expo-dev-client": "^5.1.8"
   }
 }
