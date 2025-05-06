@@ -37,18 +37,15 @@ jobs:
           npm ci
       - name: Install EAS CLI
         run: npm install -g eas-cli
-      - name: Prebuild native project
-        run: |
-          cd frontend/boilermatch
-          eas prebuild --platform android
 
       - name: Build Android App Locally
         run: |
           cd frontend/boilermatch
           eas build --platform android --profile development --local --output app-release.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: frontend/boilermatch/app-release.apk
-          
+
