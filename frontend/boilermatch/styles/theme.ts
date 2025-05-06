@@ -8,3 +8,4 @@ export const darkTheme = {
   inputText: '#ffffff',
   buttonHover: '#ff9900',
 }
+
