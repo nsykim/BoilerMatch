@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'integration/**'  # Run CI only on branches starting with "integration/"
+      - 'release/**'
 
   pull_request:
     branches:
