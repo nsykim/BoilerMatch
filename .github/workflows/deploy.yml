@@ -1,0 +1,103 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - integration/dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FIREBASE_CREDENTIALS_B64: ${{ secrets.FIREBASE_CREDENTIALS_B64 }}
+      COLLEGE_API_KEY: ${{ secrets.COLLEGE_API_KEY}}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      USER_NAME: ${{ secrets.USER_NAME }}
+      PW: ${{ secrets.PW }} 
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Create src tarball
+      run: |
+        tar -czf src.tar.gz src/
+        
+    - name: Deploy to EC2
+      run: |
+        # Set up SSH key
+        echo "${{ secrets.AWS_PEM }}" | base64 -d > boilermatch.pem
+        chmod 600 boilermatch.pem
+        
+        # Copy the tarball to EC2
+        scp -o StrictHostKeyChecking=no -i boilermatch.pem src.tar.gz ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }}:/home/${{ secrets.AWS_USER }}/src.tar.gz
+
+        # Copy the reqs.txt
+        scp -o StrictHostKeyChecking=no -i boilermatch.pem reqs.txt ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }}:/home/${{ secrets.AWS_USER }}/reqs.txt
+        
+        # Execute deployment on EC2
+        ssh -o StrictHostKeyChecking=no -i boilermatch.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_IP }} "
+          # Kill any process running on port 3020
+          fuser -k 3020/tcp || true
+          
+          # Clean up previous deployment
+          rm -rf api_deployment
+          mkdir -p api_deployment
+          
+          # Extract src files
+          tar -xzf src.tar.gz -C api_deployment
+
+          # Prepare the python environment
+          sudo yum update -y
+          sudo yum install -y gcc python3-devel
+          
+          # Setup Python environment
+          cd api_deployment
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r /home/${{ secrets.AWS_USER }}/reqs.txt
+          
+          # Setup environment variables
+          export FIREBASE_CREDENTIALS_B64='${{ env.FIREBASE_CREDENTIALS_B64 }}'
+          export COLLEGE_API_KEY='${{ env.COLLEGE_API_KEY }}'
+          export JWT_SECRET='${{ env.JWT_SECRET }}'
+          export USER_NAME='${{ env.USER_NAME }}'
+          export PW='${{ env.PW }}'
+          
+          # Configure Firebase
+          mkdir -p src/utils
+          echo \$FIREBASE_CREDENTIALS_B64 | base64 -d > src/utils/firebase_creds.json
+
+          # Run the API and detach
+          nohup python3 src/api.py > api.log 2>&1 &
+          API_PID=\$!
+
+          # Wait for the API to start to confirm it's running
+          sleep 5
+          if ! ps -p \$API_PID > /dev/null; then
+            echo 'API failed to start'
+            cat api.log
+            exit 1
+          fi
+          
+          # Check if the API is running
+          if ! curl -s http://localhost:3020/healthcheck -o /dev/null; then
+            echo 'API is not responding'
+            cat api.log
+            exit 1
+          fi
+
+          
+          # Print success message
+          echo 'API successfully deployed and running on port 3020'
+        "
+        
+        # Clean up local files
+        rm -f boilermatch.pem
+        rm -f src.tar.gz

@@ -20,3 +20,7 @@ newman-report.xml
 # PACKAGE LOCK
 package-lock.json
 node_modules/
+
+# SSH Keys
+*.pem
+*.pub
